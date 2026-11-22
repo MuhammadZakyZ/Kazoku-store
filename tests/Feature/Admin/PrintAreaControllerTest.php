@@ -30,6 +30,7 @@ class PrintAreaControllerTest extends ShopTestCase
         $response = $this->get(route('media.mockup', [$shop['black'], 'belakang']));
 
         $response->assertOk();
+        $this->assertSame('back-mockup', $response->getContent());
     }
 
     public function test_admin_can_create_a_back_area_with_conflicts_and_artwork(): void

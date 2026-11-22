@@ -6,292 +6,335 @@
 @php
 $mockups = $product->colors
 ->flatMap(fn ($c) => collect([
-    ['name' => $c->name.' — Depan', 'side' => 'depan', 'url' => $c->mockup_image ? route('media.mockup', $c) : null],
-    ['name' => $c->name.' — Belakang', 'side' => 'belakang', 'url' => $c->mockup_back ? route('media.mockup', [$c, 'belakang']) : null],
+['name' => $c->name.' — Depan', 'side' => 'depan', 'url' => $c->mockup_image ? route('media.mockup', $c) : null],
+['name' => $c->name.' — Belakang', 'side' => 'belakang', 'url' => $c->mockup_back ? route('media.mockup', [$c,
+'belakang']) : null],
 ])->filter(fn ($mockup) => filled($mockup['url'])))
 ->values();
 @endphp
-<div class="head">
-    <h1>{{ $product->name }}</h1>
-    <a class="btn ghost" href="{{ route('admin.products.index') }}">Kembali</a>
+<div class="head product-head">
+    <div>
+        <a class="crumb-link" href="{{ route('admin.products.index') }}">&larr; Daftar produk</a>
+        <h1>{{ $product->name }}</h1>
+        <p class="hint">{{ $product->options->count() }} ukuran &middot; {{ $product->colors->count() }} warna &middot;
+            {{ $product->printAreas->count() }} area sablon</p>
+    </div>
+    <span class="badge {{ $product->is_active ? 'ok' : '' }}">{{ $product->is_active ? 'Aktif' : 'Nonaktif' }}</span>
 </div>
 
-<form method="POST" action="{{ route('admin.products.update', $product) }}" enctype="multipart/form-data">
-    @csrf @method('PUT')
-    @include('admin.products._form')
-    <div class="actions section"><button class="btn" type="submit">Simpan produk</button></div>
-</form>
-
-{{-- ============ Ukuran ============ --}}
-<h2 class="section">Ukuran</h2>
-<p class="hint">Tambahan harga ditambahkan ke harga dasar. Isi 0 bila tidak ada tambahan.</p>
-
-@foreach ($product->options as $option)
-<form method="POST" action="{{ route('admin.options.update', $option) }}" class="row-form line">
-    @csrf @method('PUT')
-    <div class="f"><label>Ukuran</label><input type="text" name="name" value="{{ $option->name }}" required
-            maxlength="50"></div>
-    <div class="f"><label>Tambahan harga (Rp)</label><input type="number" name="extra_price" min="0" step="1"
-            value="{{ $option->extra_price }}"></div>
-    <button class="btn ghost sm" type="submit">Simpan</button>
-    <button class="btn danger sm" type="submit" form="del-option-{{ $option->id }}">Hapus</button>
-</form>
-<form id="del-option-{{ $option->id }}" method="POST" action="{{ route('admin.options.destroy', $option) }}"
-    onsubmit="return confirm('Hapus ukuran ini?')">
-    @csrf @method('DELETE')
-</form>
-@endforeach
-
-<form method="POST" action="{{ route('admin.products.options.store', $product) }}" class="row-form line add">
-    @csrf
-    <div class="f"><label>Ukuran baru</label><input type="text" name="name" required maxlength="50"
-            placeholder="mis. M"></div>
-    <div class="f"><label>Tambahan harga (Rp)</label><input type="number" name="extra_price" min="0" step="1" value="0">
+<section class="manage-section">
+    <div class="manage-head">
+        <h2>Informasi produk</h2>
+        <p class="hint">Nama, kategori, harga dasar, foto, dan deskripsi yang tampil di katalog.</p>
     </div>
-    <button class="btn sm" type="submit">Tambah ukuran</button>
-</form>
-
-{{-- ============ Warna + mockup ============ --}}
-<h2 class="section">Warna dan mockup</h2>
-<p class="hint">Unggah mockup depan dan belakang secara terpisah (JPG/PNG/WEBP, maks. 4 MB). Ukuran piksel harus sama
-    untuk mockup pada sisi yang sama. Sisi tanpa mockup tidak menampilkan preview.</p>
-
-@foreach ($product->colors as $color)
-<form method="POST" action="{{ route('admin.colors.update', $color) }}" enctype="multipart/form-data"
-    class="row-form line">
-    @csrf @method('PUT')
-    <div class="f"><label>Warna</label><input type="text" name="name" value="{{ $color->name }}" required
-            maxlength="50"></div>
-    <div class="f mockup-upload">
-        <label>Mockup depan</label>
-        @if ($color->mockup_image)
-        <img class="thumb" src="{{ route('media.mockup', $color) }}" alt="Mockup {{ $color->name }}">
-        <label class="check"><input type="checkbox" name="remove_mockup" value="1"> Hapus file mockup</label>
-        @else
-        <span class="badge">belum ada</span>
-        @endif
-        <input type="file" name="mockup_image" accept="image/jpeg,image/png,image/webp">
-    </div>
-    <div class="f mockup-upload">
-        <label>Mockup belakang</label>
-        @if ($color->mockup_back)
-        <img class="thumb" src="{{ route('media.mockup', [$color, 'belakang']) }}" alt="Mockup belakang {{ $color->name }}">
-        <label class="check"><input type="checkbox" name="remove_mockup_back" value="1"> Hapus file mockup</label>
-        @else
-        <span class="badge">belum ada</span>
-        @endif
-        <input type="file" name="mockup_back" accept="image/jpeg,image/png,image/webp">
-    </div>
-    <button class="btn ghost sm" type="submit">Simpan</button>
-    <button class="btn danger sm" type="submit" form="del-color-{{ $color->id }}">Hapus</button>
-</form>
-<form id="del-color-{{ $color->id }}" method="POST" action="{{ route('admin.colors.destroy', $color) }}"
-    onsubmit="return confirm('Hapus warna ini beserta file mockupnya?')">
-    @csrf @method('DELETE')
-</form>
-@endforeach
-
-<form method="POST" action="{{ route('admin.products.colors.store', $product) }}" enctype="multipart/form-data"
-    class="row-form line add">
-    @csrf
-    <div class="f"><label>Warna baru</label><input type="text" name="name" required maxlength="50"
-            placeholder="mis. Hitam"></div>
-    <div class="f"><label>Mockup depan (opsional)</label><input type="file" name="mockup_image"
-            accept="image/jpeg,image/png,image/webp"></div>
-    <div class="f"><label>Mockup belakang (opsional)</label><input type="file" name="mockup_back"
-            accept="image/jpeg,image/png,image/webp"></div>
-    <button class="btn sm" type="submit">Tambah warna</button>
-</form>
-
-{{-- ============ Area sablon ============ --}}
-<h2 class="section">Area sablon</h2>
-<p class="hint">Kelola area depan dan belakang secara terpisah. Atur kombinasi yang saling bertumpuk agar pelanggan
-    tidak dapat memilihnya bersamaan. Biaya area ditambahkan ke harga satuan.</p>
-
-<div class="editor" id="ed">
-    <p class="hint" id="ed-msg" hidden></p>
-    <div id="ed-ui" hidden>
-        <div class="ed-bar">
-            <label>Mockup sisi dan warna
-                <select id="ed-color"></select>
-            </label>
-            <div id="ed-areas" class="chips"></div>
-        </div>
-        <div class="stage" id="ed-stage"><img id="ed-img" alt="Mockup" draggable="false"></div>
-        <div class="actions">
-            <button type="button" class="btn sm" id="ed-save">Simpan posisi area terpilih</button>
-            <button type="button" class="btn ghost sm" id="ed-reset">Buat / atur ulang kotak</button>
-            <button type="button" class="btn ghost sm" id="ed-clear">Hapus posisi</button>
-        </div>
-        <p class="hint" id="ed-info"></p>
-    </div>
-</div>
-
-@foreach (['depan' => 'Area depan', 'belakang' => 'Area belakang'] as $side => $sideLabel)
-@php
-    $sideAreas = $product->printAreas->filter(fn ($area) => $area->side->value === $side)->values();
-@endphp
-<section class="area-side-section">
-    <div class="area-side-heading">
-        <div>
-            <span class="eyebrow">{{ $sideLabel }}</span>
-            <p>{{ $sideAreas->count() }} area terdaftar</p>
-        </div>
-    </div>
-
-    @forelse ($sideAreas as $area)
-    <form method="POST" action="{{ route('admin.areas.update', $area) }}" enctype="multipart/form-data"
-        class="area-config-card area-form" data-area="{{ $area->id }}" data-side="{{ $side }}"
-        data-name="{{ $area->name }}">
+    <form method="POST" action="{{ route('admin.products.update', $product) }}" enctype="multipart/form-data">
         @csrf @method('PUT')
-        <input type="hidden" name="side" value="{{ $side }}">
-        <div class="area-config-heading">
-            <div>
-                <span class="area-config-icon" aria-hidden="true">✓</span>
-                <div>
-                    <strong>{{ $area->name }}</strong>
-                    <span class="hint">{{ $sideLabel }} · {{ $area->size_label }}</span>
-                </div>
-            </div>
-            <span class="badge ok">Aktif</span>
-        </div>
-
-        <div class="grid2 area-fields">
-            <div>
-                <label for="area-name-{{ $area->id }}">Nama area</label>
-                <input id="area-name-{{ $area->id }}" type="text" name="name" value="{{ $area->name }}" required
-                    maxlength="100">
-            </div>
-            <div class="area-dimensions">
-                <div>
-                    <label for="area-width-{{ $area->id }}">Lebar (cm)</label>
-                    <input id="area-width-{{ $area->id }}" type="number" name="width_cm" min="0.1" step="0.1"
-                        value="{{ $area->width_cm }}" required>
-                </div>
-                <div>
-                    <label for="area-height-{{ $area->id }}">Tinggi (cm)</label>
-                    <input id="area-height-{{ $area->id }}" type="number" name="height_cm" min="0.1" step="0.1"
-                        value="{{ $area->height_cm }}" required>
-                </div>
-            </div>
-            <div>
-                <label for="area-price-{{ $area->id }}">Biaya tambahan (Rp)</label>
-                <input id="area-price-{{ $area->id }}" type="number" name="price" min="0" step="1"
-                    value="{{ $area->price }}">
-            </div>
-        </div>
-
-        <div class="area-conflicts">
-            <strong>Tidak bisa dipilih bersama</strong>
-            @if ($product->printAreas->count() > 1)
-            <div class="area-conflict-options">
-                @foreach ($product->printAreas->where('id', '!=', $area->id) as $otherArea)
-                <label class="check">
-                    <input type="checkbox" name="conflicts[]" value="{{ $otherArea->id }}"
-                        @checked(in_array($otherArea->id, $conflictMap[$area->id] ?? [], true))>
-                    {{ $otherArea->name }} · {{ $otherArea->side->label() }}
-                </label>
-                @endforeach
-            </div>
-            @else
-            <p class="hint">Tambahkan area lain untuk mengatur kombinasi yang tidak dapat dipilih bersama.</p>
-            @endif
-        </div>
-
-        <div class="area-artwork">
-            <div class="area-file-label">
-                <span class="area-file-icon" aria-hidden="true">▣</span>
-                <div>
-                    @if ($area->artwork_file)
-                    <strong>{{ basename($area->artwork_file) }}</strong>
-                    <span>File contoh area tersimpan</span>
-                    @else
-                    <strong>Belum ada file contoh</strong>
-                    <span>PNG, JPG, WEBP, atau PDF · maks. 4 MB</span>
-                    @endif
-                </div>
-            </div>
-            <div class="area-file-actions">
-                <label class="btn ghost sm" for="area-file-{{ $area->id }}">Ganti file</label>
-                <input id="area-file-{{ $area->id }}" class="sr-only" type="file" name="artwork_file"
-                    accept="image/png,image/jpeg,image/webp,application/pdf">
-                @if ($area->artwork_file)
-                <label class="area-remove-file">
-                    <input type="checkbox" name="remove_artwork_file" value="1">
-                    Hapus
-                </label>
-                @endif
-            </div>
-        </div>
-
-        <details class="area-preview-settings">
-            <summary>Atur posisi pada mockup</summary>
-            <p class="hint">Isi semua nilai atau kosongkan semuanya. Koordinat dihitung dalam persen terhadap sisi
-                mockup yang dipilih.</p>
-            <div class="grid2">
-                <div><label for="area-x-{{ $area->id }}">X (%)</label><input id="area-x-{{ $area->id }}" type="number"
-                    name="preview_x" min="0" max="100" step="0.01" value="{{ $area->preview_x }}"></div>
-                <div><label for="area-y-{{ $area->id }}">Y (%)</label><input id="area-y-{{ $area->id }}" type="number"
-                    name="preview_y" min="0" max="100" step="0.01" value="{{ $area->preview_y }}"></div>
-                <div><label for="area-w-{{ $area->id }}">Lebar (%)</label><input id="area-w-{{ $area->id }}" type="number"
-                    name="preview_w" min="0" max="100" step="0.01" value="{{ $area->preview_w }}"></div>
-                <div><label for="area-h-{{ $area->id }}">Tinggi (%)</label><input id="area-h-{{ $area->id }}" type="number"
-                    name="preview_h" min="0" max="100" step="0.01" value="{{ $area->preview_h }}"></div>
-            </div>
-        </details>
-
-        <div class="area-card-actions">
-            <button class="btn ghost sm" type="submit">Simpan perubahan</button>
-            <button class="btn danger sm" type="submit" form="del-area-{{ $area->id }}">Hapus area</button>
-        </div>
-    </form>
-    <form id="del-area-{{ $area->id }}" method="POST" action="{{ route('admin.areas.destroy', $area) }}"
-        onsubmit="return confirm('Hapus area ini?')">
-        @csrf @method('DELETE')
-    </form>
-    @empty
-    <p class="area-empty">Belum ada area di sisi ini.</p>
-    @endforelse
-
-    <form method="POST" action="{{ route('admin.products.areas.store', $product) }}" enctype="multipart/form-data"
-        class="area-config-card area-config-new">
-        @csrf
-        <input type="hidden" name="side" value="{{ $side }}">
-        <div class="area-config-heading">
-            <div>
-                <span class="area-config-icon" aria-hidden="true">+</span>
-                <div>
-                    <strong>Tambah {{ strtolower($sideLabel) }}</strong>
-                    <span class="hint">Area baru untuk mockup {{ strtolower($sideLabel) }}</span>
-                </div>
-            </div>
-        </div>
-        <div class="grid2 area-fields">
-            <div>
-                <label for="new-area-name-{{ $side }}">Nama area</label>
-                <input id="new-area-name-{{ $side }}" type="text" name="name" required maxlength="100"
-                    placeholder="mis. Dada kanan">
-            </div>
-            <div class="area-dimensions">
-                <div><label for="new-area-width-{{ $side }}">Lebar (cm)</label><input id="new-area-width-{{ $side }}"
-                    type="number" name="width_cm" min="0.1" step="0.1" required></div>
-                <div><label for="new-area-height-{{ $side }}">Tinggi (cm)</label><input id="new-area-height-{{ $side }}"
-                    type="number" name="height_cm" min="0.1" step="0.1" required></div>
-            </div>
-            <div>
-                <label for="new-area-price-{{ $side }}">Biaya tambahan (Rp)</label>
-                <input id="new-area-price-{{ $side }}" type="number" name="price" min="0" step="1" value="0">
-            </div>
-        </div>
-        <div class="area-file-new">
-            <label for="new-area-file-{{ $side }}">File contoh area (opsional)</label>
-            <input id="new-area-file-{{ $side }}" type="file" name="artwork_file"
-                accept="image/png,image/jpeg,image/webp,application/pdf">
-        </div>
-        <button class="btn sm" type="submit">Tambah area</button>
+        @include('admin.products._form')
+        <div class="actions section"><button class="btn" type="submit">Simpan produk</button></div>
     </form>
 </section>
-@endforeach
+
+{{-- ============ Ukuran ============ --}}
+<section class="manage-section">
+    <div class="manage-head">
+        <h2>Ukuran</h2>
+        <p class="hint">Tambahan harga ditambahkan ke harga dasar. Isi 0 bila tidak ada tambahan.</p>
+    </div>
+
+    @foreach ($product->options as $option)
+    <form method="POST" action="{{ route('admin.options.update', $option) }}" class="row-form line">
+        @csrf @method('PUT')
+        <div class="f"><label>Ukuran</label><input type="text" name="name" value="{{ $option->name }}" required
+                maxlength="50"></div>
+        <div class="f"><label>Tambahan harga (Rp)</label><input type="number" name="extra_price" min="0" step="1"
+                value="{{ $option->extra_price }}"></div>
+        <div class="row-actions">
+            <button class="btn ghost sm" type="submit">Simpan</button>
+            <button class="btn danger sm" type="submit" form="del-option-{{ $option->id }}">Hapus</button>
+        </div>
+    </form>
+    <form id="del-option-{{ $option->id }}" method="POST" action="{{ route('admin.options.destroy', $option) }}"
+        onsubmit="return confirm('Hapus ukuran ini?')">
+        @csrf @method('DELETE')
+    </form>
+    @endforeach
+
+    <form method="POST" action="{{ route('admin.products.options.store', $product) }}" class="row-form line add">
+        @csrf
+        <div class="f"><label>Ukuran baru</label><input type="text" name="name" required maxlength="50"
+                placeholder="mis. M"></div>
+        <div class="f"><label>Tambahan harga (Rp)</label><input type="number" name="extra_price" min="0" step="1"
+                value="0">
+        </div>
+        <div class="row-actions"><button class="btn sm" type="submit">Tambah ukuran</button></div>
+    </form>
+</section>
+
+{{-- ============ Warna + mockup ============ --}}
+<section class="manage-section">
+    <div class="manage-head">
+        <h2>Warna dan mockup</h2>
+        <p class="hint">Unggah mockup depan dan belakang secara terpisah (JPG/PNG/WEBP, maks. 4 MB). Ukuran piksel harus
+            sama
+            untuk mockup pada sisi yang sama. Sisi tanpa mockup tidak menampilkan preview.</p>
+    </div>
+
+    @foreach ($product->colors as $color)
+    <form method="POST" action="{{ route('admin.colors.update', $color) }}" enctype="multipart/form-data"
+        class="row-form line color-row">
+        @csrf @method('PUT')
+        <div class="f"><label>Warna</label><input type="text" name="name" value="{{ $color->name }}" required
+                maxlength="50"></div>
+        <div class="f mockup-upload">
+            <label>Mockup depan</label>
+            @if ($color->mockup_image)
+            <img class="thumb" src="{{ route('media.mockup', $color) }}" alt="Mockup {{ $color->name }}">
+            <label class="check"><input type="checkbox" name="remove_mockup" value="1"> Hapus file mockup</label>
+            @else
+            <span class="badge">belum ada</span>
+            @endif
+            <input type="file" name="mockup_image" accept="image/jpeg,image/png,image/webp">
+        </div>
+        <div class="f mockup-upload">
+            <label>Mockup belakang</label>
+            @if ($color->mockup_back)
+            <img class="thumb" src="{{ route('media.mockup', [$color, 'belakang']) }}"
+                alt="Mockup belakang {{ $color->name }}">
+            <label class="check"><input type="checkbox" name="remove_mockup_back" value="1"> Hapus file mockup</label>
+            @else
+            <span class="badge">belum ada</span>
+            @endif
+            <input type="file" name="mockup_back" accept="image/jpeg,image/png,image/webp">
+        </div>
+        <div class="row-actions">
+            <button class="btn ghost sm" type="submit">Simpan</button>
+            <button class="btn danger sm" type="submit" form="del-color-{{ $color->id }}">Hapus</button>
+        </div>
+    </form>
+    <form id="del-color-{{ $color->id }}" method="POST" action="{{ route('admin.colors.destroy', $color) }}"
+        onsubmit="return confirm('Hapus warna ini beserta file mockupnya?')">
+        @csrf @method('DELETE')
+    </form>
+    @endforeach
+
+    <form method="POST" action="{{ route('admin.products.colors.store', $product) }}" enctype="multipart/form-data"
+        class="row-form line add color-row">
+        @csrf
+        <div class="f"><label>Warna baru</label><input type="text" name="name" required maxlength="50"
+                placeholder="mis. Hitam"></div>
+        <div class="f"><label>Mockup depan (opsional)</label><input type="file" name="mockup_image"
+                accept="image/jpeg,image/png,image/webp"></div>
+        <div class="f"><label>Mockup belakang (opsional)</label><input type="file" name="mockup_back"
+                accept="image/jpeg,image/png,image/webp"></div>
+        <div class="row-actions"><button class="btn sm" type="submit">Tambah warna</button></div>
+    </form>
+</section>
+
+{{-- ============ Area sablon ============ --}}
+<section class="manage-section">
+    <div class="manage-head">
+        <h2>Area sablon</h2>
+        <p class="hint">Kelola area depan dan belakang secara terpisah. Atur kombinasi yang saling bertumpuk agar
+            pelanggan
+            tidak dapat memilihnya bersamaan. Biaya area ditambahkan ke harga satuan.</p>
+    </div>
+
+    <div class="editor" id="ed">
+        <p class="hint" id="ed-msg" hidden></p>
+        <div id="ed-ui" hidden>
+            <div class="ed-bar">
+                <label>Mockup sisi dan warna
+                    <select id="ed-color"></select>
+                </label>
+                <div id="ed-areas" class="chips"></div>
+            </div>
+            <div class="stage" id="ed-stage"><img id="ed-img" alt="Mockup" draggable="false"></div>
+            <div class="actions">
+                <button type="button" class="btn sm" id="ed-save">Simpan posisi area terpilih</button>
+                <button type="button" class="btn ghost sm" id="ed-reset">Buat / atur ulang kotak</button>
+                <button type="button" class="btn ghost sm" id="ed-clear">Hapus posisi</button>
+            </div>
+            <p class="hint" id="ed-info"></p>
+        </div>
+    </div>
+
+    @foreach (['depan' => 'Area depan', 'belakang' => 'Area belakang'] as $side => $sideLabel)
+    @php
+    $sideAreas = $product->printAreas->filter(fn ($area) => $area->side->value === $side)->values();
+    @endphp
+    <section class="area-side-section">
+        <div class="area-side-heading">
+            <div>
+                <span class="eyebrow">{{ $sideLabel }}</span>
+                <p>{{ $sideAreas->count() }} area terdaftar</p>
+            </div>
+        </div>
+
+        @forelse ($sideAreas as $area)
+        <form method="POST" action="{{ route('admin.areas.update', $area) }}" enctype="multipart/form-data"
+            class="area-config-card area-form" data-area="{{ $area->id }}" data-side="{{ $side }}"
+            data-name="{{ $area->name }}">
+            @csrf @method('PUT')
+            <input type="hidden" name="side" value="{{ $side }}">
+            <div class="area-config-heading">
+                <div>
+                    <span class="area-config-icon" aria-hidden="true">✓</span>
+                    <div>
+                        <strong>{{ $area->name }}</strong>
+                        <span class="hint">{{ $sideLabel }} · {{ $area->size_label }}</span>
+                    </div>
+                </div>
+                <span class="badge ok">Aktif</span>
+            </div>
+
+            <div class="area-body">
+                <div class="area-col-main">
+                    <div class="area-fields">
+                        <div>
+                            <label for="area-name-{{ $area->id }}">Nama area</label>
+                            <input id="area-name-{{ $area->id }}" type="text" name="name" value="{{ $area->name }}"
+                                required maxlength="100">
+                        </div>
+                        <div class="area-dimensions">
+                            <div>
+                                <label for="area-width-{{ $area->id }}">Lebar (cm)</label>
+                                <input id="area-width-{{ $area->id }}" type="number" name="width_cm" min="0.1"
+                                    step="0.1" value="{{ $area->width_cm }}" required>
+                            </div>
+                            <div>
+                                <label for="area-height-{{ $area->id }}">Tinggi (cm)</label>
+                                <input id="area-height-{{ $area->id }}" type="number" name="height_cm" min="0.1"
+                                    step="0.1" value="{{ $area->height_cm }}" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="area-price-{{ $area->id }}">Biaya tambahan (Rp)</label>
+                            <input id="area-price-{{ $area->id }}" type="number" name="price" min="0" step="1"
+                                value="{{ $area->price }}">
+                        </div>
+                    </div>
+                    <div class="area-artwork">
+                        <div class="area-file-label">
+                            <span class="area-file-icon" aria-hidden="true">▣</span>
+                            <div>
+                                @if ($area->artwork_file)
+                                <strong>{{ basename($area->artwork_file) }}</strong>
+                                <span>File contoh area tersimpan</span>
+                                @else
+                                <strong>Belum ada file contoh</strong>
+                                <span>PNG, JPG, WEBP, atau PDF · maks. 4 MB</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="area-file-actions">
+                            <label class="btn ghost sm" for="area-file-{{ $area->id }}">Ganti file</label>
+                            <input id="area-file-{{ $area->id }}" class="sr-only" type="file" name="artwork_file"
+                                accept="image/png,image/jpeg,image/webp,application/pdf">
+                            @if ($area->artwork_file)
+                            <label class="area-remove-file">
+                                <input type="checkbox" name="remove_artwork_file" value="1">
+                                Hapus
+                            </label>
+                            @endif
+                        </div>
+                    </div>
+                    <details class="area-preview-settings">
+                        <summary>Atur posisi pada mockup</summary>
+                        <p class="hint">Isi semua nilai atau kosongkan semuanya. Koordinat dihitung dalam persen
+                            terhadap sisi
+                            mockup yang dipilih.</p>
+                        <div class="grid2">
+                            <div><label for="area-x-{{ $area->id }}">X (%)</label><input id="area-x-{{ $area->id }}"
+                                    type="number" name="preview_x" min="0" max="100" step="0.01"
+                                    value="{{ $area->preview_x }}"></div>
+                            <div><label for="area-y-{{ $area->id }}">Y (%)</label><input id="area-y-{{ $area->id }}"
+                                    type="number" name="preview_y" min="0" max="100" step="0.01"
+                                    value="{{ $area->preview_y }}"></div>
+                            <div><label for="area-w-{{ $area->id }}">Lebar (%)</label><input id="area-w-{{ $area->id }}"
+                                    type="number" name="preview_w" min="0" max="100" step="0.01"
+                                    value="{{ $area->preview_w }}"></div>
+                            <div><label for="area-h-{{ $area->id }}">Tinggi (%)</label><input
+                                    id="area-h-{{ $area->id }}" type="number" name="preview_h" min="0" max="100"
+                                    step="0.01" value="{{ $area->preview_h }}"></div>
+                        </div>
+                    </details>
+                </div>
+                <aside class="area-col-side">
+                    <div class="area-conflicts">
+                        <strong>Tidak bisa dipilih bersama</strong>
+                        @if ($product->printAreas->count() > 1)
+                        <div class="area-conflict-options">
+                            @foreach ($product->printAreas->where('id', '!=', $area->id) as $otherArea)
+                            <label class="check">
+                                <input type="checkbox" name="conflicts[]" value="{{ $otherArea->id }}"
+                                    @checked(in_array($otherArea->id, $conflictMap[$area->id] ?? [], true))>
+                                {{ $otherArea->name }} · {{ $otherArea->side->label() }}
+                            </label>
+                            @endforeach
+                        </div>
+                        @else
+                        <p class="hint">Tambahkan area lain untuk mengatur kombinasi yang tidak dapat dipilih bersama.
+                        </p>
+                        @endif
+                    </div>
+                </aside>
+            </div>
+
+            <div class="area-card-actions">
+                <button class="btn ghost sm" type="submit">Simpan perubahan</button>
+                <button class="btn danger sm" type="submit" form="del-area-{{ $area->id }}">Hapus area</button>
+            </div>
+        </form>
+        <form id="del-area-{{ $area->id }}" method="POST" action="{{ route('admin.areas.destroy', $area) }}"
+            onsubmit="return confirm('Hapus area ini?')">
+            @csrf @method('DELETE')
+        </form>
+        @empty
+        <p class="area-empty">Belum ada area di sisi ini.</p>
+        @endforelse
+
+        <form method="POST" action="{{ route('admin.products.areas.store', $product) }}" enctype="multipart/form-data"
+            class="area-config-card area-config-new">
+            @csrf
+            <input type="hidden" name="side" value="{{ $side }}">
+            <div class="area-config-heading">
+                <div>
+                    <span class="area-config-icon" aria-hidden="true">+</span>
+                    <div>
+                        <strong>Tambah {{ strtolower($sideLabel) }}</strong>
+                        <span class="hint">Area baru untuk mockup {{ strtolower($sideLabel) }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="area-fields">
+                <div>
+                    <label for="new-area-name-{{ $side }}">Nama area</label>
+                    <input id="new-area-name-{{ $side }}" type="text" name="name" required maxlength="100"
+                        placeholder="mis. Dada kanan">
+                </div>
+                <div class="area-dimensions">
+                    <div><label for="new-area-width-{{ $side }}">Lebar (cm)</label><input
+                            id="new-area-width-{{ $side }}" type="number" name="width_cm" min="0.1" step="0.1" required>
+                    </div>
+                    <div><label for="new-area-height-{{ $side }}">Tinggi (cm)</label><input
+                            id="new-area-height-{{ $side }}" type="number" name="height_cm" min="0.1" step="0.1"
+                            required></div>
+                </div>
+                <div>
+                    <label for="new-area-price-{{ $side }}">Biaya tambahan (Rp)</label>
+                    <input id="new-area-price-{{ $side }}" type="number" name="price" min="0" step="1" value="0">
+                </div>
+            </div>
+            <div class="area-file-new">
+                <label for="new-area-file-{{ $side }}">File contoh area (opsional)</label>
+                <input id="new-area-file-{{ $side }}" type="file" name="artwork_file"
+                    accept="image/png,image/jpeg,image/webp,application/pdf">
+            </div>
+            <button class="btn sm" type="submit">Tambah area</button>
+        </form>
+    </section>
+    @endforeach
+</section>
 
 <script>
 (function() {
@@ -300,11 +343,13 @@ $mockups = $product->colors
     var ui = document.getElementById('ed-ui');
     var forms = Array.prototype.slice.call(document.querySelectorAll('.area-form'));
 
-    Array.prototype.slice.call(document.querySelectorAll('.area-config-card input[type="file"]')).forEach(function(input) {
+    Array.prototype.slice.call(document.querySelectorAll('.area-config-card input[type="file"]')).forEach(function(
+        input) {
         input.addEventListener('change', function() {
             var file = input.files[0];
             var label = input.closest('.area-config-card').querySelector('.area-file-label');
-            var remove = input.closest('.area-config-card').querySelector('[name="remove_artwork_file"]');
+            var remove = input.closest('.area-config-card').querySelector(
+                '[name="remove_artwork_file"]');
 
             if (file && label) {
                 label.querySelector('strong').textContent = file.name;
@@ -625,9 +670,9 @@ $mockups = $product->colors
     var initialSideArea = forms.find(function(f) {
         return f.dataset.side === activeSide;
     });
-    sel = saved && byId[saved] && byId[saved].dataset.side === activeSide
-        ? saved
-        : (initialSideArea ? initialSideArea.dataset.area : null);
+    sel = saved && byId[saved] && byId[saved].dataset.side === activeSide ?
+        saved :
+        (initialSideArea ? initialSideArea.dataset.area : null);
     render();
 
     if (recall('ed-scroll') === '1') {

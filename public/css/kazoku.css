@@ -543,3 +543,126 @@ a.item:hover,.item:hover{border-color:var(--brand);box-shadow:0 12px 28px rgba(0
 .product-area-list small{color:var(--muted);font-size:.73rem}
 .product-area-list strong{grid-column:2;grid-row:1/3;align-self:center;color:var(--brand);font-size:.78rem;text-align:right}
 @media (max-width:640px){.area-artwork{align-items:flex-start;flex-direction:column}.area-file-actions{width:100%;justify-content:flex-start}.area-config-card{padding:.8rem}}
+
+/* ===== Admin produk: rapikan daftar, kartu bagian, dan baris form ===== */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.product-head{align-items:flex-start;margin-bottom:1.25rem}
+.product-head h1{margin:.2rem 0 .25rem}
+.product-head .hint{margin:0}
+.crumb-link{font-size:.82rem;color:var(--muted);text-decoration:none}
+.crumb-link:hover{color:var(--brand)}
+.badge.warn{background:#2a2410;color:#e4b75f}
+
+/* Tabel daftar produk: bungkus agar sudut membulat dan gulir menyamping rapi */
+.table-wrap{overflow-x:auto;border:1px solid #2b2b2b;border-radius:12px;background:var(--card)}
+.table-wrap table{display:table;width:100%;min-width:860px;margin:0;border:0;border-radius:0;overflow:visible}
+.admin .table-wrap th,.admin .table-wrap td{vertical-align:middle;white-space:nowrap}
+.table-wrap th.r,.table-wrap td.r{text-align:right}
+.table-wrap th.c,.table-wrap td.c{text-align:center}
+.table-wrap td.empty{white-space:normal;padding:1.5rem;text-align:center}
+.nowrap{white-space:nowrap}
+.product-cell{display:flex;align-items:center;gap:.7rem;min-width:180px}
+.product-cell strong{font-size:.92rem;white-space:normal}
+.product-thumb{flex:none;width:44px;height:44px;border-radius:10px;object-fit:cover;border:1px solid #2b2b2b;background:#1b1b1b}
+.product-thumb-ph{display:grid;place-items:center;color:var(--brand);font-weight:800}
+.table-wrap .actions{flex-wrap:nowrap;justify-content:flex-end}
+
+/* Halaman kelola produk: tiap bagian jadi kartu */
+.manage-section{margin-top:1.25rem;padding:1.25rem 1.35rem;border:1px solid #2b2b2b;border-radius:14px;background:#111}
+.manage-section>.hint:first-child{margin-top:0}
+.manage-head{margin-bottom:1rem;padding-bottom:.85rem;border-bottom:1px solid #292929}
+.manage-head h2{margin:0 0 .25rem;font-size:1.1rem}
+.manage-head .hint{margin:0;max-width:70ch}
+.manage-section .grid2{gap:0 1.25rem}
+.manage-section .thumb{max-height:80px;max-width:140px}
+
+/* Baris form (ukuran, warna): kolom sejajar di atas, tombol di kanan */
+.manage-section .row-form.line{align-items:flex-start;gap:.9rem 1rem;padding:1rem 0;border-bottom:1px solid #292929}
+.manage-section .row-form.line.add{margin-top:1rem;padding:1rem;border:1px dashed #3a3115;border-radius:12px;background:#17150f}
+.manage-section .row-form .f{flex:1 1 200px}
+.manage-section .row-form .f label{margin:0 0 .3rem;font-size:.78rem;color:var(--muted)}
+.manage-section .row-form .f input[type=text],.manage-section .row-form .f input[type=number],.manage-section .row-form .f input[type=file]{width:100%}
+.row-actions{display:flex;gap:.5rem;align-items:center;flex:0 0 auto;margin-left:auto;padding-top:1.45rem}
+.mockup-upload{display:flex;flex-direction:column;gap:.45rem}
+.mockup-upload .thumb{margin:0}
+.mockup-upload .check{margin:0;font-size:.78rem;color:var(--muted)}
+.mockup-upload .badge{align-self:flex-start}
+.color-row .f{flex-basis:220px}
+
+/* Area sablon: editor posisi dan kartu area */
+.manage-section .editor{margin:0 0 1.25rem;padding:1rem;border:1px dashed #3a3115;border-radius:12px;background:#0d0d0d}
+.manage-section .ed-bar{align-items:flex-start}
+.manage-section .ed-bar label{font-size:.78rem;color:var(--muted)}
+.manage-section .ed-bar select{margin-top:.3rem}
+.manage-section .stage{max-width:100%;width:min(560px,100%)}
+.area-side-section{margin-top:1.5rem}
+.area-side-section:first-of-type{margin-top:0}
+.area-config-card .btn{white-space:nowrap}
+.area-config-card .grid2{align-items:start}
+.area-fields>div,.area-dimensions>div{min-width:0}
+.area-card-actions{justify-content:flex-end;padding-top:.75rem;border-top:1px solid #302d24}
+
+@media (max-width:760px){
+  .manage-section{padding:1rem}
+  .row-actions{width:100%;margin-left:0;padding-top:0}
+  .row-actions .btn{flex:1}
+  .product-head{flex-direction:column}
+}
+
+/* ===== Area sablon: kartu terpisah, dua kolom (pengaturan kiri, bentrok kanan) ===== */
+.manage-section .area-side-section{display:grid;gap:1rem;margin-top:1.75rem;padding:0}
+.manage-section .area-side-heading{display:flex;align-items:center;justify-content:space-between;margin:0;padding:.2rem 0 .8rem;border-bottom:1px solid #292929}
+.manage-section .area-side-heading>div{display:flex;align-items:baseline;gap:.75rem}
+.manage-section .area-side-heading p{margin:0;color:var(--muted);font-size:.82rem}
+
+.manage-section .area-config-card{display:block;margin:0;padding:1.1rem 1.2rem 1rem;border:1px solid #3a3115;border-left:4px solid var(--brand);border-radius:14px;background:#17150f;box-shadow:0 6px 18px rgba(0,0,0,.28)}
+.manage-section .area-config-card + form{margin:0}
+.manage-section .area-config-card.area-config-new{border:1px dashed #5b4a1a;border-left:4px dashed #5b4a1a;background:#111;box-shadow:none}
+.manage-section .area-config-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0 0 1rem;padding-bottom:.85rem;border-bottom:1px solid #302d24}
+.manage-section .area-config-heading>div{display:flex;flex-direction:row;align-items:center;gap:.75rem;min-width:0}
+.manage-section .area-config-heading>div>div{display:flex;flex-direction:column;gap:.1rem;min-width:0}
+.manage-section .area-config-heading strong{font-size:1rem}
+.manage-section .area-config-icon{flex:none;width:28px;height:28px}
+
+/* dua kolom: kiri pengaturan, kanan bentrok */
+.area-body{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(240px,1fr);gap:1.25rem;align-items:start}
+.area-col-main{display:grid;gap:1rem;min-width:0}
+.area-col-side{min-width:0}
+.area-col-side .area-conflicts{position:sticky;top:1rem;margin:0;padding:.9rem 1rem;border:1px solid #302d24;border-radius:12px;background:#111}
+.area-col-side .area-conflicts>strong{display:block;margin-bottom:.35rem;font-size:.82rem}
+.area-col-side .area-conflict-options{grid-template-columns:1fr;gap:.1rem}
+.area-col-side .area-conflict-options .check{margin:.2rem 0;padding:.4rem .5rem;border-radius:8px;font-size:.82rem}
+.area-col-side .area-conflict-options .check:hover{background:#1b1b1b}
+
+/* nama penuh, lalu lebar / tinggi / biaya sebaris */
+.manage-section .area-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem 1rem}
+.manage-section .area-fields>div:first-child{grid-column:1/-1}
+.manage-section .area-dimensions{display:contents}
+.manage-section .area-fields label{display:block;margin:0 0 .3rem;font-size:.76rem;color:var(--muted)}
+.manage-section .area-fields input{width:100%}
+.manage-section .area-config-new .area-file-new{margin-top:1rem}
+
+.manage-section .area-card-actions{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem;padding-top:.9rem;border-top:1px solid #302d24}
+.manage-section .area-preview-settings .grid2{grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem .75rem}
+
+@media (max-width:900px){
+  .area-body{grid-template-columns:1fr}
+  .area-col-side .area-conflicts{position:static}
+  .area-col-side .area-conflict-options{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+}
+@media (max-width:560px){
+  .manage-section .area-fields{grid-template-columns:1fr 1fr}
+  .manage-section .area-fields>div:nth-child(4){grid-column:1/-1}
+  .manage-section .area-preview-settings .grid2{grid-template-columns:1fr 1fr}
+}
+
+/* ===== Tanpa scrollbar horizontal pada halaman ===== */
+html,body{max-width:100%}
+body{overflow-x:hidden}
+.admin>*,.admin .panel,.manage-section,.area-config-card,.area-body>*,.row-form .f,.editor,.stage{min-width:0;max-width:100%}
+:where(.admin .panel img,.admin .panel video){max-width:100%;height:auto}
+.admin .panel input,.admin .panel select,.admin .panel textarea{max-width:100%}
+
+/* Thumbnail mockup: ukuran asli (tidak melar), maksimal 160x120, proporsi dijaga */
+.manage-section .thumb,.mockup-upload .thumb{display:block;align-self:flex-start;width:auto;height:auto;max-width:min(100%,180px);max-height:120px;object-fit:contain;border-radius:8px;background:#fff}
+.product-thumb{object-fit:cover}
