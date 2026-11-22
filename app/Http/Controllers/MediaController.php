@@ -8,11 +8,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class MediaController extends Controller
 {
-    /** Mockup per warna: disk privat, hanya untuk pengguna yang sudah login. */
-    public function mockup(ProductColor $color): Response
+    /** Mockup per warna dan sisi (depan atau belakang): disk privat, hanya untuk pengguna yang sudah login. */
+    public function mockup(ProductColor $color, string $side = 'depan'): Response
     {
-        abort_unless($color->mockup_image && Storage::disk('local')->exists($color->mockup_image), 404);
+        $path = $color->mockupPath($side);
 
-        return Storage::disk('local')->response($color->mockup_image);
+        abort_unless($path && Storage::disk('local')->exists($path), 404);
+
+        return Storage::disk('local')->response($path);
     }
 }

@@ -4,40 +4,45 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#090909">
     <title>@yield('title', 'Kazoku Store')</title>
     <link rel="stylesheet" href="{{ asset('css/kazoku.css') }}">
 </head>
 
-<body>
+<body
+    class="{{ request()->routeIs('admin.*') ? 'admin-layout' : (request()->routeIs('login') ? 'login-layout' : '') }}">
     <header class="nav">
         <div class="nav-in">
             <a class="brand" href="{{ route('home') }}">Kazoku Store</a>
 
-            <nav class="menu">
-                <a href="{{ route('products.index') }}"
-                    class="{{ request()->routeIs('products.*') ? 'on' : '' }}">Produk</a>
-                <a href="{{ route('portfolios.index') }}"
-                    class="{{ request()->routeIs('portfolios.*') ? 'on' : '' }}">Portofolio</a>
+            <nav class="menu" aria-label="Navigasi utama">
+                <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'on' : '' }}"
+                    aria-current="{{ request()->routeIs('home') ? 'page' : 'false' }}">Beranda</a>
+                <a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'on' : '' }}"
+                    aria-current="{{ request()->routeIs('products.*') ? 'page' : 'false' }}">Produk</a>
+                <a href="{{ route('portfolios.index') }}" class="{{ request()->routeIs('portfolios.*') ? 'on' : '' }}"
+                    aria-current="{{ request()->routeIs('portfolios.*') ? 'page' : 'false' }}">Portofolio</a>
                 <a href="{{ route('testimonials.index') }}"
-                    class="{{ request()->routeIs('testimonials.*') ? 'on' : '' }}">Testimoni</a>
-                <a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') ? 'on' : '' }}">Kontak</a>
+                    class="{{ request()->routeIs('testimonials.*') ? 'on' : '' }}"
+                    aria-current="{{ request()->routeIs('testimonials.*') ? 'page' : 'false' }}">Testimoni</a>
+                <a href="{{ route('contact') }}" class="{{ request()->routeIs('contact') ? 'on' : '' }}"
+                    aria-current="{{ request()->routeIs('contact') ? 'page' : 'false' }}">Profil &amp; Kontak</a>
             </nav>
 
-            <div class="acct">
+            <div class="acct" aria-label="Menu akun">
                 @auth
                 @if (auth()->user()->isAdmin())
-                <a href="{{ route('admin.dashboard') }}">Panel Admin</a>
+                <a href="{{ route('admin.dashboard') }}" class="btn ghost">Panel Admin</a>
                 @endif
-                <a href="{{ route('orders.index') }}" class="{{ request()->routeIs('orders.*') ? 'on' : '' }}">Pesanan
-                    Saya</a>
+                <a href="{{ route('orders.index') }}" class="{{ request()->routeIs('orders.*') ? 'on' : '' }}"
+                    aria-current="{{ request()->routeIs('orders.*') ? 'page' : 'false' }}">Pesanan Saya</a>
                 <span>{{ auth()->user()->name }}</span>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="btn ghost">Keluar</button>
                 </form>
                 @else
-                <a href="{{ route('login') }}">Masuk</a>
-                <a class="btn" href="{{ route('register') }}">Daftar</a>
+                <a class="btn ghost account-cta" href="{{ route('login') }}">Masuk / Daftar</a>
                 @endauth
             </div>
         </div>
@@ -56,7 +61,8 @@
     @endauth
 
     <main class="wrap">
-        @if (session('status'))
+        @if (session('status') && !(request()->routeIs('orders.show') && str_starts_with(session('status'), 'Pesanan
+        berhasil dibuat.')))
         <div class="alert ok">{{ session('status') }}</div>
         @endif
 
@@ -69,8 +75,32 @@
 
     <footer class="foot">
         <div class="foot-in">
-            <span>© {{ now()->year }} Kazoku Store</span>
-            <a href="{{ route('contact') }}">Kontak &amp; alamat</a>
+            <div class="foot-main">
+                <section class="foot-about" aria-label="Tentang Kazoku Store">
+                    <a class="foot-brand" href="{{ route('home') }}">Kazoku Store</a>
+                    <p>Layanan custom printing untuk membuat ide dan desain Anda menjadi produk yang berkesan.</p>
+                </section>
+
+                <nav class="foot-column" aria-label="Jelajahi">
+                    <h2>Jelajahi</h2>
+                    <a href="{{ route('home') }}">Beranda</a>
+                    <a href="{{ route('products.index') }}">Produk</a>
+                    <a href="{{ route('portfolios.index') }}">Portofolio</a>
+                    <a href="{{ route('testimonials.index') }}">Testimoni</a>
+                </nav>
+
+                <section class="foot-column" aria-label="Hubungi kami">
+                    <h2>Hubungi kami</h2>
+                    <p></p>
+                    <p>Ingin bertanya atau mulai membuat pesanan?</p>
+                    <a href="{{ route('contact') }}">Lihat profil &amp; kontak</a>
+                </section>
+            </div>
+
+            <div class="foot-bottom">
+                <span>© {{ now()->year }} Kazoku Store. Hak cipta dilindungi.</span>
+                <span>Dibuat dengan sepenuh hati.</span>
+            </div>
         </div>
     </footer>
 </body>

@@ -3,6 +3,10 @@
 @section('content')
 <div class="admin">
     <aside class="side">
+        <a class="admin-brand" href="{{ route('admin.dashboard') }}">
+            <span class="admin-brand-mark" aria-hidden="true">K</span>
+            <span>Kazoku Store</span>
+        </a>
         <a href="{{ route('admin.dashboard') }}"
             class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Ringkasan</a>
         <a href="{{ route('admin.orders.index') }}"
@@ -20,6 +24,10 @@
             tarif</a>
         <a href="{{ route('admin.settings.edit') }}"
             class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">Pengaturan</a>
+        <form class="admin-logout" method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit">Keluar</button>
+        </form>
     </aside>
 
     <section class="panel">

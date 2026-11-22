@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Order;
 use App\Notifications\OrderNotification;
+use App\Support\AreaRules;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
@@ -11,6 +12,47 @@ use Tests\ShopTestCase;
 
 class OrderCreationTest extends ShopTestCase
 {
+    public function test_order_form_separates_front_and_back_areas_and_uses_the_back_mockup_route(): void
+    {
+        Storage::fake('local');
+        $customer = $this->customer();
+        $shop = $this->shop();
+        $shop['back']->update(['side' => 'belakang']);
+        $shop['black']->update([
+            'mockup_image' => 'mockups/front.png',
+            'mockup_back' => 'mockups/back.png',
+        ]);
+        Storage::disk('local')->put('mockups/front.png', 'front');
+        Storage::disk('local')->put('mockups/back.png', 'back');
+
+        $this->actingAs($customer)
+            ->get(route('orders.create', $shop['product']))
+            ->assertOk()
+            ->assertSee('Area depan')
+            ->assertSee('Area belakang')
+            ->assertSee(str_replace('/', '\\/', route('media.mockup', [$shop['black'], 'belakang'])), false);
+
+        $this->get(route('products.show', $shop['product']))
+            ->assertOk()
+            ->assertSee('Area Depan')
+            ->assertSee('Area Belakang');
+    }
+
+    public function test_customer_cannot_submit_conflicting_print_areas(): void
+    {
+        Storage::fake('local');
+        $customer = $this->customer();
+        $shop = $this->shop();
+        AreaRules::setConflicts($shop['chest'], [$shop['back']->id]);
+
+        $this->actingAs($customer)->post(
+            route('orders.store', $shop['product']),
+            $this->orderPayload($shop)
+        )->assertSessionHasErrors('area_ids');
+
+        $this->assertDatabaseCount('orders', 0);
+    }
+
     public function test_server_recalculates_totals_and_ignores_forged_fields(): void
     {
         Storage::fake('local');

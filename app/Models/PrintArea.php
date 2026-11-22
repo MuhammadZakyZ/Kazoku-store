@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AreaSide;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,13 +11,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class PrintArea extends Model
 {
     protected $fillable = [
-        'product_id', 'name', 'width_cm', 'height_cm', 'price',
+        'product_id', 'name', 'side', 'artwork_file', 'width_cm', 'height_cm', 'price',
         'preview_x', 'preview_y', 'preview_w', 'preview_h',
     ];
 
     protected function casts(): array
     {
         return [
+            'side' => AreaSide::class,
             'width_cm' => 'float',
             'height_cm' => 'float',
             'price' => 'integer',
@@ -46,10 +48,10 @@ class PrintArea extends Model
             .' cm');
     }
 
-    /** Contoh: "Dada kiri (10×10 cm)" */
+    /** Contoh: "Dada kiri — Depan (10×10 cm)" */
     protected function label(): Attribute
     {
-        return Attribute::get(fn () => "{$this->name} ({$this->size_label})");
+        return Attribute::get(fn () => "{$this->name} — {$this->side->label()} ({$this->size_label})");
     }
 
     public function hasPreviewCoordinates(): bool

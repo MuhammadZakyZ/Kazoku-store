@@ -43,19 +43,28 @@
 
             @if ($product->printAreas->isNotEmpty())
                 <h2>Area sablon</h2>
-                <table class="mini">
-                    <thead><tr><th>Posisi</th><th>Ukuran</th><th>Biaya</th></tr></thead>
-                    <tbody>
-                    @foreach ($product->printAreas as $area)
-                        <tr>
-                            <td>{{ $area->name }}</td>
-                            <td>{{ $area->size_label }}</td>
-                            <td>{{ $area->price > 0 ? 'Rp '.number_format($area->price, 0, ',', '.') : 'Gratis' }}</td>
-                        </tr>
+                <div class="product-area-sides">
+                    @foreach (['depan' => 'Depan', 'belakang' => 'Belakang'] as $side => $sideLabel)
+                        @php
+                            $sideAreas = $product->printAreas->filter(fn ($area) => $area->side->value === $side)->values();
+                        @endphp
+                        @if ($sideAreas->isNotEmpty())
+                            <section class="product-area-side">
+                                <h3>Area {{ $sideLabel }}</h3>
+                                <div class="product-area-list">
+                                    @foreach ($sideAreas as $area)
+                                        <div>
+                                            <span>{{ $area->name }}</span>
+                                            <small>{{ $area->size_label }}</small>
+                                            <strong>{{ $area->price > 0 ? '+Rp '.number_format($area->price, 0, ',', '.') : 'Gratis' }}</strong>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </section>
+                        @endif
                     @endforeach
-                    </tbody>
-                </table>
-                <p class="hint">Biaya semua area yang Anda pilih ditambahkan ke harga satuan.</p>
+                </div>
+                <p class="hint">Biaya area yang Anda pilih ditambahkan ke harga satuan.</p>
             @endif
 
             @if ($hasPreview)

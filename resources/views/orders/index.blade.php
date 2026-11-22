@@ -3,10 +3,22 @@
 @section('title', 'Pesanan Saya — Kazoku Store')
 
 @section('content')
-    <h1>Pesanan Saya</h1>
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">Semua dalam satu tempat</span>
+            <h1>Pesanan saya</h1>
+            <p>Pantau status pesanan dan pembayaranmu di sini.</p>
+        </div>
+        <a class="btn ghost" href="{{ route('products.index') }}">Jelajahi produk</a>
+    </div>
 
     @if ($orders->isEmpty())
-        <p class="empty">Anda belum punya pesanan. <a href="{{ route('products.index') }}">Lihat produk</a>.</p>
+        <div class="empty-state">
+            <span class="empty-icon" aria-hidden="true">♡</span>
+            <h2>Belum ada pesanan</h2>
+            <p>Pesanan custom pertamamu dimulai dari sini. Temukan produk dan buat sesuatu yang spesial.</p>
+            <a class="btn" href="{{ route('products.index') }}">Lihat produk</a>
+        </div>
     @else
         <div class="panel">
             <table>

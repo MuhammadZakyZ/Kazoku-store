@@ -4,7 +4,13 @@
 
 @section('content')
     <p class="crumb"><a href="{{ route('products.show', $product) }}">‹ {{ $product->name }}</a></p>
-    <h1>Pesan: {{ $product->name }}</h1>
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">Mulai pesanan custom</span>
+            <h1>Pesan {{ $product->name }}</h1>
+            <p>Lengkapi beberapa pilihan berikut untuk menyiapkan pesananmu.</p>
+        </div>
+    </div>
 
     @if ($errors->any())
         <div class="alert err">
@@ -16,14 +22,16 @@
         </div>
     @endif
 
-    <ol class="steps" id="steps">
-        <li><button type="button" data-go="1">1. Produk</button></li>
-        <li><button type="button" data-go="2">2. Desain</button></li>
-        <li><button type="button" data-go="3">3. Pengiriman</button></li>
-        <li><button type="button" data-go="4">4. Ringkasan</button></li>
-    </ol>
+    <div class="order-layout">
+        <div class="order-main">
+            <ol class="steps" id="steps">
+                <li><button type="button" data-go="1">1. Produk</button></li>
+                <li><button type="button" data-go="2">2. Desain</button></li>
+                <li><button type="button" data-go="3">3. Pengiriman</button></li>
+                <li><button type="button" data-go="4">4. Ringkasan</button></li>
+            </ol>
 
-    <form id="order-form" class="panel" method="POST" action="{{ route('orders.store', $product) }}" enctype="multipart/form-data" novalidate>
+            <form id="order-form" class="panel" method="POST" action="{{ route('orders.store', $product) }}" enctype="multipart/form-data" novalidate>
         @csrf
 
         {{-- ===== Langkah 1: produk ===== --}}
@@ -78,25 +86,52 @@
                     <div class="alert err">Produk ini belum punya area sablon, jadi belum bisa dipesan dengan desain sendiri. Pilih konsultasi.</div>
                 @else
                     <h2>Area sablon</h2>
-                    <p class="hint">Pilih satu atau beberapa area, lalu unggah satu file per area (PNG, JPG, WEBP, atau PDF, maksimal 10 MB). Biaya semua area yang dipilih ditambahkan ke harga satuan.</p>
+                    <p class="hint">Pilih area depan atau belakang, lalu unggah satu file per area (PNG, JPG, WEBP,
+                        atau PDF, maksimal 10 MB). Area yang bertumpuk tidak dapat dipilih bersamaan.</p>
 
-                    @foreach ($product->printAreas as $area)
-                        <div class="area-card" data-area="{{ $area->id }}">
-                            <label class="check">
-                                <input type="checkbox" name="area_ids[]" value="{{ $area->id }}" @checked(in_array($area->id, array_map('intval', (array) old('area_ids', []))))>
-                                <strong>{{ $area->name }}</strong>
-                                <span class="hint">{{ $area->size_label }} · {{ $area->price > 0 ? '+Rp '.number_format($area->price, 0, ',', '.') : 'gratis' }}</span>
-                            </label>
-                            <input class="area-file" type="file" name="designs[{{ $area->id }}]" accept="image/png,image/jpeg,image/webp,application/pdf" disabled>
-                        </div>
+                    @foreach (['depan' => 'Area depan', 'belakang' => 'Area belakang'] as $side => $sideLabel)
+                        @php
+                            $sideAreas = $product->printAreas->filter(fn ($area) => $area->side->value === $side)->values();
+                        @endphp
+                        @if ($sideAreas->isNotEmpty())
+                            <section class="order-area-side" data-order-side="{{ $side }}">
+                                <div class="order-area-heading">
+                                    <h3>{{ $sideLabel }}</h3>
+                                    <span>{{ $sideAreas->count() }} pilihan</span>
+                                </div>
+                                @foreach ($sideAreas as $area)
+                                    <div class="area-card" data-area="{{ $area->id }}" data-side="{{ $side }}">
+                                        <label class="check">
+                                            <input type="checkbox" name="area_ids[]" value="{{ $area->id }}"
+                                                @checked(in_array($area->id, array_map('intval', (array) old('area_ids', []))))>
+                                            <strong>{{ $area->name }}</strong>
+                                            <span class="hint">{{ $area->size_label }} ·
+                                                {{ $area->price > 0 ? '+Rp '.number_format($area->price, 0, ',', '.') : 'gratis' }}</span>
+                                        </label>
+                                        <p class="area-blocked-message" hidden></p>
+                                        <input class="area-file" type="file" name="designs[{{ $area->id }}]"
+                                            accept="image/png,image/jpeg,image/webp,application/pdf" disabled>
+                                    </div>
+                                @endforeach
+                            </section>
+                        @endif
                     @endforeach
                     <div id="area-error" class="err-text" hidden>Pilih minimal satu area sablon.</div>
                 @endif
 
                 <div id="pv" hidden>
                     <h2>Preview</h2>
-                    <p class="hint" id="pv-note"></p>
-                    <div class="pv-stage" id="pv-stage"><img id="pv-img" alt="Mockup" draggable="false"></div>
+                    <p class="hint">Preview desain Anda dipisahkan menurut sisi mockup.</p>
+                    <div class="preview-sides">
+                        @foreach (['depan' => 'Area depan', 'belakang' => 'Area belakang'] as $side => $sideLabel)
+                            <section class="preview-side" data-preview-side="{{ $side }}" hidden>
+                                <h3>{{ $sideLabel }}</h3>
+                                <p class="hint preview-side-note"></p>
+                                <div class="pv-stage"><img class="pv-img" alt="Mockup {{ strtolower($sideLabel) }}"
+                                    draggable="false"></div>
+                            </section>
+                        @endforeach
+                    </div>
                     <p class="hint">Preview hanya gambaran penempatan desain pada produk, bukan hasil cetak akhir.</p>
                 </div>
             </div>
@@ -166,7 +201,35 @@
             <span class="hint" id="total-bar"></span>
             <button type="button" class="btn" id="btn-next">Lanjut ›</button>
         </div>
-    </form>
+            </form>
+        </div>
+
+        <aside class="order-summary" aria-labelledby="order-summary-title">
+            <h2 id="order-summary-title">Ringkasan produk</h2>
+            <div class="order-summary-product">
+                @if ($product->image)
+                    <img src="{{ asset('storage/'.$product->image) }}" alt="" loading="lazy">
+                @else
+                    <span class="order-summary-image" aria-hidden="true">K</span>
+                @endif
+                <div>
+                    <span class="tag">{{ $product->category->name }}</span>
+                    <h3>{{ $product->name }}</h3>
+                    <p id="summary-color">{{ $product->colors->first()?->name ?? 'Pilih warna' }}</p>
+                </div>
+            </div>
+            <dl>
+                <div><dt>Ukuran</dt><dd id="summary-size">Pilih ukuran</dd></div>
+                <div><dt>Jumlah</dt><dd id="summary-qty">{{ old('quantity', 1) }}</dd></div>
+                <div><dt>Harga satuan</dt><dd id="summary-unit">Rp {{ number_format($product->base_price, 0, ',', '.') }}</dd></div>
+            </dl>
+            <div class="order-summary-total">
+                <span>Perkiraan total</span>
+                <strong id="summary-total">Rp {{ number_format($product->base_price, 0, ',', '.') }}</strong>
+            </div>
+            <p class="order-summary-note">Ongkir dan biaya pilihan lainnya akan diperbarui saat Anda melanjutkan pesanan.</p>
+        </aside>
+    </div>
 
     <script>
     (function () {
@@ -196,6 +259,31 @@
         function delivery() { return checkedVal('delivery_method'); }
         function selectedAreaIds() {
             return qa('input[name="area_ids[]"]:checked', form).map(function (el) { return parseInt(el.value, 10); });
+        }
+        function conflictingAreaIds(areaId) {
+            return data.conflicts[areaId] || data.conflicts[String(areaId)] || [];
+        }
+        function updateAreaAvailability() {
+            var selected = selectedAreaIds();
+            qa('.area-card', form).forEach(function (card) {
+                var areaId = parseInt(card.dataset.area, 10);
+                var blockedBy = [];
+                selected.forEach(function (selectedId) {
+                    if (selectedId !== areaId && conflictingAreaIds(selectedId).indexOf(areaId) !== -1) {
+                        blockedBy.push(areasById[selectedId].name);
+                    }
+                });
+
+                var checkbox = q('input[type=checkbox]', card);
+                var message = q('.area-blocked-message', card);
+                card.dataset.conflicted = blockedBy.length ? '1' : '0';
+                card.classList.toggle('area-blocked', blockedBy.length > 0);
+                checkbox.disabled = blockedBy.length > 0 && !checkbox.checked;
+                message.hidden = blockedBy.length === 0;
+                message.textContent = blockedBy.length
+                    ? 'Tidak bisa dipilih bersama ' + blockedBy.join(' dan ') + '. Batalkan pilihan tersebut untuk mengaktifkan area ini.'
+                    : '';
+            });
         }
         function selectedOption() {
             var el = q('#option_id', form);
@@ -261,6 +349,8 @@
         }
         function paintSummary() {
             var c = calc();
+            var option = selectedOption();
+            var color = selectedColor();
             q('#s-base').textContent = rp(data.basePrice);
             q('#s-size').textContent = rp(c.size);
             q('#s-area').textContent = rp(c.area);
@@ -270,6 +360,11 @@
             q('#s-total').textContent = rp(c.total);
             q('#s-dp').textContent = rp(c.dp);
             q('#s-full').textContent = 'bayar ' + rp(c.total);
+            q('#summary-size').textContent = option ? option.name : 'Pilih ukuran';
+            q('#summary-color').textContent = color ? color.name : 'Pilih warna';
+            q('#summary-qty').textContent = c.qty;
+            q('#summary-unit').textContent = rp(c.unit);
+            q('#summary-total').textContent = rp(c.total);
             if (shipCostEl) { shipCostEl.textContent = rp(c.ship); }
             totalBar.textContent = 'Perkiraan total: ' + rp(c.total);
         }
@@ -277,9 +372,13 @@
         // ---------- blok yang bergantung pilihan ----------
         function toggleBlocks() {
             var consult = designType() === 'konsultasi';
+            updateAreaAvailability();
             q('#design-block').hidden = consult;
             q('#consult-note').hidden = !consult;
-            qa('#design-block input[name="area_ids[]"]').forEach(function (el) { el.disabled = consult; });
+            qa('#design-block input[name="area_ids[]"]').forEach(function (el) {
+                var card = el.closest('.area-card');
+                el.disabled = consult || (card.dataset.conflicted === '1' && !el.checked);
+            });
 
             qa('.area-card').forEach(function (card) {
                 var cb = q('input[type=checkbox]', card);
@@ -299,7 +398,8 @@
         }
 
         // ---------- preview ----------
-        var pv = q('#pv'), pvImg = q('#pv-img'), pvStage = q('#pv-stage'), pvNote = q('#pv-note');
+        var pv = q('#pv');
+        var previewSides = qa('.preview-side');
         var urls = {};
 
         function artFor(areaId) {
@@ -320,41 +420,60 @@
             if (!show) { return; }
 
             var color = selectedColor();
-            qa('.pv-box', pvStage).forEach(function (n) { n.remove(); });
+            var selected = selectedAreaIds();
 
-            if (!color || !color.mockup) {
-                pvImg.hidden = true;
-                pvNote.textContent = 'Warna ini belum punya foto mockup, jadi preview belum tersedia. Pesanan tetap bisa dilanjutkan.';
-                return;
-            }
-            pvImg.hidden = false;
-            if (pvImg.getAttribute('src') !== color.mockup) { pvImg.src = color.mockup; }
+            previewSides.forEach(function (preview) {
+                var side = preview.dataset.previewSide;
+                var sideAreas = selected.filter(function (id) {
+                    return areasById[id].side === side;
+                });
+                preview.hidden = sideAreas.length === 0;
+                if (!sideAreas.length) { return; }
 
-            var missing = [];
-            selectedAreaIds().forEach(function (id) {
-                var a = areasById[id];
-                if (a.x === null || a.y === null || a.w === null || a.h === null) { missing.push(a.name); return; }
-                var box = document.createElement('div');
-                box.className = 'pv-box';
-                box.style.left = a.x + '%'; box.style.top = a.y + '%';
-                box.style.width = a.w + '%'; box.style.height = a.h + '%';
-                var art = artFor(id);
-                if (art.kind === 'image') {
-                    var im = document.createElement('img');
-                    im.className = 'pv-art'; im.src = art.url; im.alt = 'Desain ' + a.name;
-                    box.appendChild(im);
-                } else {
-                    var lb = document.createElement('span');
-                    lb.className = 'pv-label';
-                    lb.textContent = art.kind === 'pdf' ? 'PDF: preview tidak tersedia' : a.name;
-                    box.appendChild(lb);
+                var image = q('.pv-img', preview);
+                var stage = q('.pv-stage', preview);
+                var note = q('.preview-side-note', preview);
+                qa('.pv-box', stage).forEach(function (box) { box.remove(); });
+                var mockup = color && color.mockups ? color.mockups[side] : null;
+
+                if (!mockup) {
+                    image.hidden = true;
+                    note.textContent = 'Mockup ' + side + ' belum tersedia untuk warna ini. Pesanan tetap bisa dilanjutkan.';
+                    return;
                 }
-                pvStage.appendChild(box);
-            });
 
-            pvNote.textContent = missing.length
-                ? 'Area ini belum punya posisi preview: ' + missing.join(', ') + '.'
-                : 'Pratinjau desain Anda pada warna terpilih.';
+                image.hidden = false;
+                if (image.getAttribute('src') !== mockup) { image.src = mockup; }
+
+                var missing = [];
+                sideAreas.forEach(function (id) {
+                    var area = areasById[id];
+                    if (area.x === null || area.y === null || area.w === null || area.h === null) {
+                        missing.push(area.name);
+                        return;
+                    }
+                    var box = document.createElement('div');
+                    box.className = 'pv-box';
+                    box.style.left = area.x + '%'; box.style.top = area.y + '%';
+                    box.style.width = area.w + '%'; box.style.height = area.h + '%';
+                    var art = artFor(id);
+                    if (art.kind === 'image') {
+                        var artwork = document.createElement('img');
+                        artwork.className = 'pv-art'; artwork.src = art.url; artwork.alt = 'Desain ' + area.name;
+                        box.appendChild(artwork);
+                    } else {
+                        var label = document.createElement('span');
+                        label.className = 'pv-label';
+                        label.textContent = art.kind === 'pdf' ? 'PDF: preview tidak tersedia' : area.name;
+                        box.appendChild(label);
+                    }
+                    stage.appendChild(box);
+                });
+
+                note.textContent = missing.length
+                    ? 'Area ini belum punya posisi preview: ' + missing.join(', ') + '.'
+                    : 'Pratinjau pada mockup ' + side + '.';
+            });
         }
 
         // ---------- navigasi langkah ----------

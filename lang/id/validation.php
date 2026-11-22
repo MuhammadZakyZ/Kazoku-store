@@ -105,5 +105,8 @@ return [
         'channel' => 'cara pembayaran',
         'area_id' => 'area',
         'file' => 'file desain final',
+        'side' => 'sisi',
+        'mockup_back' => 'file mockup belakang',
+        'conflicts' => 'larangan kombinasi',
     ],
 ];

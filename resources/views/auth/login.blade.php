@@ -4,6 +4,7 @@
 
 @section('content')
     <div class="card">
+        <a class="auth-brand" href="{{ route('home') }}">Kazoku Store</a>
         <h1>Masuk</h1>
 
         <form method="POST" action="{{ route('login') }}">

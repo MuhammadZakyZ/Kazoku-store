@@ -68,16 +68,27 @@ class Product extends Model
     }
 
     /**
-     * BR-10: preview hanya bila ada warna ber-mockup dan area ber-koordinat.
+     * BR-10: preview tersedia bila, pada sedikitnya satu sisi, ada warna ber-mockup
+     * dan area ber-koordinat pada sisi yang sama.
      */
     public function hasPreview(): bool
     {
-        return $this->colors()->whereNotNull('mockup_image')->exists()
-            && $this->printAreas()
+        foreach (['depan' => 'mockup_image', 'belakang' => 'mockup_back'] as $side => $column) {
+            $hasMockup = $this->colors()->whereNotNull($column)->exists();
+
+            $hasArea = $this->printAreas()
+                ->where('side', $side)
                 ->whereNotNull('preview_x')
                 ->whereNotNull('preview_y')
                 ->whereNotNull('preview_w')
                 ->whereNotNull('preview_h')
                 ->exists();
+
+            if ($hasMockup && $hasArea) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

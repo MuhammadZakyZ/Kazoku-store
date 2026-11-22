@@ -3,10 +3,20 @@
 @section('title', 'Testimoni — Kazoku Store')
 
 @section('content')
-    <h1>Testimoni</h1>
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">Cerita dari pelanggan</span>
+            <h1>Testimoni pelanggan</h1>
+            <p>Setiap karya punya cerita. Ini beberapa pengalaman pelanggan Kazoku Store.</p>
+        </div>
+    </div>
 
     @if ($testimonials->isEmpty())
-        <p class="empty">Belum ada testimoni.</p>
+        <div class="empty-state">
+            <span class="empty-icon" aria-hidden="true">“</span>
+            <h2>Belum ada cerita</h2>
+            <p>Testimoni pelanggan akan tampil di sini setelah tersedia.</p>
+        </div>
     @else
         <div class="quotes">
             @foreach ($testimonials as $testimonial)

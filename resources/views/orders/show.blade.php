@@ -3,6 +3,17 @@
 @section('title', 'Pesanan '.$order->code.' — Kazoku Store')
 
 @section('content')
+@if (session('status') && str_starts_with(session('status'), 'Pesanan berhasil dibuat.'))
+<section class="order-success" role="status">
+    <span class="order-success-icon" aria-hidden="true">✓</span>
+    <div>
+        <h2>Pesanan berhasil dikirim!</h2>
+        <p>{{ session('status') }}</p>
+    </div>
+    <a class="btn ghost" href="{{ route('orders.index') }}">Pesanan saya</a>
+</section>
+@endif
+
 <div class="head">
     <h1>Pesanan {{ $order->code }}</h1>
     <span

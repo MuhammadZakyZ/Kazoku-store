@@ -14,6 +14,9 @@ use Illuminate\Validation\ValidationException;
 
 class ProductColorController extends Controller
 {
+    /** field form => sisi */
+    private const SIDES = ['mockup_image' => 'depan', 'mockup_back' => 'belakang'];
+
     public function store(Request $request, Product $product): RedirectResponse
     {
         $data = $request->validate($this->rules($product));
@@ -21,9 +24,11 @@ class ProductColorController extends Controller
         $color = new ProductColor(['name' => $data['name']]);
         $color->product_id = $product->id;
 
-        if ($request->hasFile('mockup_image')) {
-            $this->assertSameSize($product, $request->file('mockup_image'));
-            $color->mockup_image = $request->file('mockup_image')->store('mockups', 'local');
+        foreach (self::SIDES as $field => $side) {
+            if ($request->hasFile($field)) {
+                $this->assertSameSize($product, $request->file($field), $field);
+                $color->{$field} = $request->file($field)->store('mockups', 'local');
+            }
         }
 
         $color->save();
@@ -38,18 +43,22 @@ class ProductColorController extends Controller
 
         $color->name = $request->input('name');
 
-        if ($request->boolean('remove_mockup') && $color->mockup_image) {
-            Storage::disk('local')->delete($color->mockup_image);
-            $color->mockup_image = null;
-        }
+        foreach (self::SIDES as $field => $side) {
+            $removeField = $field === 'mockup_back' ? 'remove_mockup_back' : 'remove_mockup';
 
-        if ($request->hasFile('mockup_image')) {
-            $this->assertSameSize($product, $request->file('mockup_image'), $color->id);
-
-            if ($color->mockup_image) {
-                Storage::disk('local')->delete($color->mockup_image);
+            if ($request->boolean($removeField) && $color->{$field}) {
+                Storage::disk('local')->delete($color->{$field});
+                $color->{$field} = null;
             }
-            $color->mockup_image = $request->file('mockup_image')->store('mockups', 'local');
+
+            if ($request->hasFile($field)) {
+                $this->assertSameSize($product, $request->file($field), $field, $color->id);
+
+                if ($color->{$field}) {
+                    Storage::disk('local')->delete($color->{$field});
+                }
+                $color->{$field} = $request->file($field)->store('mockups', 'local');
+            }
         }
 
         $color->save();
@@ -59,8 +68,10 @@ class ProductColorController extends Controller
 
     public function destroy(ProductColor $color): RedirectResponse
     {
-        if ($color->mockup_image) {
-            Storage::disk('local')->delete($color->mockup_image);
+        foreach (array_keys(self::SIDES) as $field) {
+            if ($color->{$field}) {
+                Storage::disk('local')->delete($color->{$field});
+            }
         }
 
         $color->delete();
@@ -76,14 +87,15 @@ class ProductColorController extends Controller
                 Rule::unique('product_colors', 'name')->where('product_id', $product->id)->ignore($ignoreId),
             ],
             'mockup_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'mockup_back' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ];
     }
 
-    /** Semua mockup satu produk harus berukuran piksel sama (handoff bagian 13, butir 5). */
-    private function assertSameSize(Product $product, UploadedFile $file, ?int $ignoreId = null): void
+    /** Semua mockup pada SISI yang sama dalam satu produk harus berukuran piksel sama. */
+    private function assertSameSize(Product $product, UploadedFile $file, string $field, ?int $ignoreId = null): void
     {
         $existing = $product->colors()
-            ->whereNotNull('mockup_image')
+            ->whereNotNull($field)
             ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
             ->first();
 
@@ -91,7 +103,7 @@ class ProductColorController extends Controller
             return;
         }
 
-        $existingPath = Storage::disk('local')->path($existing->mockup_image);
+        $existingPath = Storage::disk('local')->path($existing->{$field});
         if (! is_file($existingPath)) {
             return;
         }
@@ -100,8 +112,10 @@ class ProductColorController extends Controller
         $b = @getimagesize($file->getRealPath());
 
         if ($a && $b && ($a[0] !== $b[0] || $a[1] !== $b[1])) {
+            $sideLabel = self::SIDES[$field];
+
             throw ValidationException::withMessages([
-                'mockup_image' => "Ukuran file harus sama dengan mockup warna lain pada produk ini ({$a[0]}×{$a[1]} piksel); file ini {$b[0]}×{$b[1]}.",
+                $field => "Ukuran file mockup {$sideLabel} harus sama dengan mockup {$sideLabel} warna lain pada produk ini ({$a[0]}×{$a[1]} piksel); file ini {$b[0]}×{$b[1]}.",
             ]);
         }
     }

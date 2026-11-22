@@ -3,7 +3,13 @@
 @section('title', 'Portofolio — Kazoku Store')
 
 @section('content')
-    <h1>Portofolio</h1>
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">Dibuat dengan cerita</span>
+            <h1>Portofolio</h1>
+            <p>Lihat berbagai ide yang sudah diwujudkan menjadi karya custom.</p>
+        </div>
+    </div>
 
     @if ($errors->any())
         <div class="alert err">
@@ -32,9 +38,14 @@
     </form>
 
     @if ($portfolios->isEmpty())
-        <p class="empty">Belum ada portofolio yang cocok.</p>
+        <div class="empty-state">
+            <span class="empty-icon" aria-hidden="true">✳</span>
+            <h2>Karya belum ditemukan</h2>
+            <p>Coba kata kunci lain atau lihat semua karya yang tersedia.</p>
+            <a class="btn ghost" href="{{ route('portfolios.index') }}">Lihat semua karya</a>
+        </div>
     @else
-        <div class="cards">
+        <div class="cards portfolio-grid">
             @foreach ($portfolios as $portfolio)
                 @include('partials.portfolio-card', ['portfolio' => $portfolio])
             @endforeach

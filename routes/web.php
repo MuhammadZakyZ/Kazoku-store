@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CourierController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\OrderActionController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PortfolioController;
 use App\Http\Controllers\Admin\PrintAreaController;
 use App\Http\Controllers\Admin\ProductColorController;
@@ -24,8 +26,6 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderFileController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\Admin\OrderActionController;
-use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
@@ -66,7 +66,9 @@ Route::middleware('auth')->group(function () {
         ->name('verification.send');
 
     // Mockup per warna (disk privat), untuk pengguna login.
-    Route::get('/media/mockups/{color}', [MediaController::class, 'mockup'])->name('media.mockup');
+    Route::get('/media/mockups/{color}/{side?}', [MediaController::class, 'mockup'])
+        ->where('side', 'depan|belakang')
+        ->name('media.mockup');
 
     // Detail pesanan: pemilik atau admin (dicek di controller; selain itu 404).
     Route::get('/pesanan', [OrderController::class, 'index'])->name('orders.index');

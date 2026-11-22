@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Support\AreaRules;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,6 +51,7 @@ class ProductController extends Controller
 
         return view('admin.products.edit', [
             'product' => $product,
+            'conflictMap' => AreaRules::map($product->id),
             'categories' => Category::orderBy('name')->get(),
         ]);
     }
@@ -79,6 +81,14 @@ class ProductController extends Controller
         foreach ($product->colors as $color) {
             if ($color->mockup_image) {
                 Storage::disk('local')->delete($color->mockup_image);
+            }
+            if ($color->mockup_back) {
+                Storage::disk('local')->delete($color->mockup_back);
+            }
+        }
+        foreach ($product->printAreas as $area) {
+            if ($area->artwork_file) {
+                Storage::disk('local')->delete($area->artwork_file);
             }
         }
         if ($product->image) {

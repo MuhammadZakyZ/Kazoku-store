@@ -16,6 +16,8 @@ class PortfolioController extends Controller
     {
         return view('admin.portfolios.index', [
             'portfolios' => Portfolio::with('category')->latest()->get(),
+            'newPortfolio' => new Portfolio,
+            'categories' => Category::orderBy('name')->get(),
         ]);
     }
 

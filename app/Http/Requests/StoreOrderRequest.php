@@ -6,6 +6,7 @@ use App\Enums\DeliveryMethod;
 use App\Enums\DesignType;
 use App\Enums\PaymentMethod;
 use App\Models\PrintArea;
+use App\Support\AreaRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -68,6 +69,33 @@ class StoreOrderRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    /** Aturan kombinasi area: pasangan yang tumpang tindih tidak boleh dipilih bersama. */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            if ($this->input('design_type') !== DesignType::PunyaDesain->value) {
+                return;
+            }
+
+            $product = $this->route('product');
+            $violations = AreaRules::violations($this->selectedAreaIds(), $product->id);
+
+            if ($violations === []) {
+                return;
+            }
+
+            $ids = array_unique(array_merge(...$violations));
+            $names = PrintArea::whereIn('id', $ids)->pluck('name', 'id');
+
+            foreach ($violations as [$a, $b]) {
+                $validator->errors()->add(
+                    'area_ids',
+                    "Area {$names[$a]} tidak dapat dipilih bersama {$names[$b]} karena tumpang tindih."
+                );
+            }
+        });
     }
 
     public function attributes(): array

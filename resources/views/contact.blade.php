@@ -3,10 +3,17 @@
 @section('title', 'Profil & Kontak — Kazoku Store')
 
 @section('content')
-    <h1>Profil dan kontak</h1>
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">Kenalan lebih dekat</span>
+            <h1>Profil &amp; kontak</h1>
+            <p>Ada pertanyaan atau ide yang ingin dibuat? Kami siap membantu.</p>
+        </div>
+    </div>
 
     <div class="contact">
         <section>
+            <span class="eyebrow">Tentang kami</span>
             <h2>Kazoku Store</h2>
             <p>Jasa custom printing. Pilih produk, unggah desain, dan pantau pesanan Anda secara online.</p>
 
@@ -26,6 +33,7 @@
         </section>
 
         <section>
+            <span class="eyebrow">Kami siap membantu</span>
             <h2>Hubungi kami</h2>
             @if ($whatsapp)
                 <p>WhatsApp: {{ $whatsappNumber }}</p>

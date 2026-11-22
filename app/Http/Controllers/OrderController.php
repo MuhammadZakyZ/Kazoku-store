@@ -7,6 +7,7 @@ use App\Enums\DesignFileType;
 use App\Enums\DesignType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Http\Controllers\Concerns\ChecksOrderAccess;
 use App\Http\Requests\StoreOrderRequest;
 use App\Models\Courier;
 use App\Models\Order;
@@ -14,15 +15,15 @@ use App\Models\Product;
 use App\Models\Setting;
 use App\Models\ShippingRate;
 use App\Notifications\OrderNotification;
+use App\Support\AreaRules;
 use App\Support\Notify;
 use App\Support\PaymentPlanner;
-use Illuminate\Support\Facades\Gate;
 use App\Support\Whatsapp;
-use App\Http\Controllers\Concerns\ChecksOrderAccess;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -61,12 +62,16 @@ class OrderController extends Controller
             ])->values(),
             'colors' => $product->colors->map(fn ($c) => [
                 'id' => $c->id, 'name' => $c->name,
-                'mockup' => $c->mockup_image ? route('media.mockup', $c) : null,
+                'mockups' => [
+                    'depan' => $c->mockup_image ? route('media.mockup', $c) : null,
+                    'belakang' => $c->mockup_back ? route('media.mockup', [$c, 'belakang']) : null,
+                ],
             ])->values(),
             'areas' => $product->printAreas->map(fn ($a) => [
-                'id' => $a->id, 'name' => $a->name, 'label' => $a->size_label, 'price' => $a->price,
+                'id' => $a->id, 'name' => $a->name, 'side' => $a->side->value, 'label' => $a->size_label, 'price' => $a->price,
                 'x' => $a->preview_x, 'y' => $a->preview_y, 'w' => $a->preview_w, 'h' => $a->preview_h,
             ])->values(),
+            'conflicts' => (object) AreaRules::map($product->id),
             'couriers' => $couriers->map(fn ($c) => [
                 'id' => $c->id, 'name' => $c->name,
                 'rates' => $c->shippingRates->map(fn ($r) => [
@@ -153,7 +158,7 @@ class OrderController extends Controller
                     $order->designs()->create([
                         'print_area_id' => $area->id,
                         'area_name' => $area->name,
-                        'print_size' => $area->size_label,
+                        'print_size' => $area->side->label().' · '.$area->size_label,
                         'area_price' => $area->price,
                         'file' => $path,
                         'type' => DesignFileType::Pelanggan->value,
