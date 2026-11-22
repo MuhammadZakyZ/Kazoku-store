@@ -13,7 +13,10 @@
     class="{{ request()->routeIs('admin.*') ? 'admin-layout' : (request()->routeIs('login') ? 'login-layout' : '') }}">
     <header class="nav">
         <div class="nav-in">
-            <a class="brand" href="{{ route('home') }}">Kazoku Store</a>
+            <a class="brand" href="{{ route('home') }}" aria-label="Kazoku Store — Beranda">
+                <img src="{{ asset('images/kazoku-logo.png') }}" alt="Kazoku Digital Printing Garment" width="113"
+                    height="54">
+            </a>
 
             <nav class="menu" aria-label="Navigasi utama">
                 <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'on' : '' }}"
@@ -73,36 +76,9 @@
         @yield('content')
     </main>
 
-    <footer class="foot">
-        <div class="foot-in">
-            <div class="foot-main">
-                <section class="foot-about" aria-label="Tentang Kazoku Store">
-                    <a class="foot-brand" href="{{ route('home') }}">Kazoku Store</a>
-                    <p>Layanan custom printing untuk membuat ide dan desain Anda menjadi produk yang berkesan.</p>
-                </section>
-
-                <nav class="foot-column" aria-label="Jelajahi">
-                    <h2>Jelajahi</h2>
-                    <a href="{{ route('home') }}">Beranda</a>
-                    <a href="{{ route('products.index') }}">Produk</a>
-                    <a href="{{ route('portfolios.index') }}">Portofolio</a>
-                    <a href="{{ route('testimonials.index') }}">Testimoni</a>
-                </nav>
-
-                <section class="foot-column" aria-label="Hubungi kami">
-                    <h2>Hubungi kami</h2>
-                    <p></p>
-                    <p>Ingin bertanya atau mulai membuat pesanan?</p>
-                    <a href="{{ route('contact') }}">Lihat profil &amp; kontak</a>
-                </section>
-            </div>
-
-            <div class="foot-bottom">
-                <span>© {{ now()->year }} Kazoku Store. Hak cipta dilindungi.</span>
-                <span>Dibuat dengan sepenuh hati.</span>
-            </div>
-        </div>
-    </footer>
+    @unless (request()->routeIs('admin.*') || request()->routeIs('login'))
+    @include('partials.footer')
+    @endunless
 </body>
 
 </html>

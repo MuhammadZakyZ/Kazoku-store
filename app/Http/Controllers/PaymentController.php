@@ -42,7 +42,7 @@ class PaymentController extends Controller
                 $locked = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
                 $plan = PaymentPlanner::next($locked);
 
-                if ($result === null) {
+                if ($plan === null) {
                     return null;
                 }
 
@@ -69,7 +69,7 @@ class PaymentController extends Controller
             throw $e;
         }
 
-        if ($plan === null) {
+        if ($result === null) {
             Storage::disk('local')->delete($path);
 
             return back()->with('error', 'Saat ini tidak ada pembayaran yang perlu diunggah untuk pesanan ini.');

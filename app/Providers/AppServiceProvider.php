@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Setting;
+use App\Support\Whatsapp;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +22,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Data footer (WhatsApp, email, peta) diambil dari Pengaturan admin.
+        View::composer('partials.footer', function ($view) {
+            $address = trim((string) Setting::get('address'));
+
+            $view->with([
+                'footerWhatsapp' => Whatsapp::link(Setting::get('whatsapp_number'), 'Halo Kazoku Store, saya ingin bertanya.'),
+                'footerEmail' => filled($email = Setting::get('business_email')) ? $email : null,
+                'footerMap' => $address !== ''
+                    ? 'https://www.google.com/maps/search/?api=1&query='.rawurlencode($address)
+                    : null,
+            ]);
+        });
     }
 }
