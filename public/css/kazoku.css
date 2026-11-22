@@ -2564,6 +2564,86 @@ a.item:hover,
 .portfolio-admin-card .actions {
     margin-top: 0.7rem;
 }
+
+.portfolio-page .catalog-form {
+    grid-template-columns: 1fr;
+}
+.portfolio-page .catalog-panel {
+    border-color: #222;
+    background: #0f0f0f;
+}
+.portfolio-page .category-pills a {
+    padding: 0.4rem 1rem;
+    border-color: #333;
+    background: transparent;
+    color: #d6d6d6;
+}
+.portfolio-page .category-pills a:hover {
+    border-color: var(--brand);
+    color: var(--brand);
+}
+.portfolio-page .category-pills a.active {
+    border-color: var(--brand);
+    background: var(--brand);
+    color: #171717;
+    font-weight: 700;
+}
+
+.portfolio-page .portfolio-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+.pf-tile {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    aspect-ratio: 4/3.1;
+    border: 1px solid #262626;
+    border-radius: 14px;
+    background: #151515;
+}
+.pf-tile img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+.pf-tile:hover img {
+    transform: scale(1.05);
+}
+.pf-tile figcaption {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 2.8rem 1rem 0.9rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.86), rgba(0, 0, 0, 0));
+}
+.pf-tile h3 {
+    margin: 0;
+    color: #fff;
+    font-size: 0.92rem;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+}
+.pf-tile figcaption span {
+    color: #cfcfcf;
+    font-size: 0.7rem;
+}
+
+@media (max-width: 900px) {
+    .portfolio-page .portfolio-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 420px) {
+    .pf-tile {
+        aspect-ratio: 1/1;
+    }
+}
+
 .admin-brand {
     white-space: nowrap;
 }
@@ -3947,4 +4027,9 @@ main.wrap:has(> .hero) {
         align-items: flex-start;
         gap: 0.25rem;
     }
+}
+
+/* Testimoni: kontainer menjorok ke tengah */
+main.wrap:has(> .quotes) {
+    max-width: 1300px;
 }

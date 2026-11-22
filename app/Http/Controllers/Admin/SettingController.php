@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class SettingController extends Controller
 {
-    private const KEYS = ['whatsapp_number', 'dp_percent', 'free_revision_limit', 'address', 'opening_hours', 'payment_instructions'];
+    private const KEYS = ['whatsapp_number', 'dp_percent', 'free_revision_limit', 'address', 'maps_url', 'opening_hours', 'payment_instructions'];
 
     public function edit(): View
     {
@@ -36,6 +36,7 @@ class SettingController extends Controller
             'dp_percent' => ['required', 'integer', 'between:0,100'],
             'free_revision_limit' => ['required', 'integer', 'min:0', 'max:100'],
             'address' => ['nullable', 'string', 'max:500'],
+            'maps_url' => ['nullable', 'url:http,https', 'max:500'],
             'opening_hours' => ['nullable', 'string', 'max:500'],
             'payment_instructions' => ['nullable', 'string', 'max:1000'],
         ]);

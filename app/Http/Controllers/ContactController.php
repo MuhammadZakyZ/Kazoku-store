@@ -14,6 +14,7 @@ class ContactController extends Controller
 
         return view('contact', [
             'address' => Setting::get('address'),
+            'mapsUrl' => Setting::get('maps_url'),
             'openingHours' => Setting::get('opening_hours'),
             'whatsappNumber' => $number,
             'whatsapp' => Whatsapp::link($number, 'Halo Kazoku Store, saya ingin bertanya.'),

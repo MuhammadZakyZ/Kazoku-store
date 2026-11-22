@@ -29,6 +29,12 @@
     <label for="address">Alamat usaha</label>
     <textarea id="address" name="address" rows="3" maxlength="500">{{ old('address', $values['address']) }}</textarea>
 
+    <label for="maps_url">Tautan lokasi / peta</label>
+    <input id="maps_url" type="url" name="maps_url" maxlength="500" value="{{ old('maps_url', $values['maps_url']) }}"
+        placeholder="https://maps.app.goo.gl/...">
+    <div class="hint">Opsional. Pelanggan yang menekan "Lihat di peta" di halaman Profil &amp; Kontak diarahkan ke
+        tautan ini (mis. tautan Google Maps). Harus diawali http:// atau https://.</div>
+
     <label for="opening_hours">Jam buka</label>
     <textarea id="opening_hours" name="opening_hours" rows="3" maxlength="500"
         placeholder="mis. Senin–Sabtu, 09.00–17.00 WIB">{{ old('opening_hours', $values['opening_hours']) }}</textarea>
