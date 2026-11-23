@@ -105,6 +105,11 @@ $summaryCards = [
             @endforelse
         </tbody>
     </table>
+    @if (method_exists($orders, 'total'))
+    <div class="orders-foot">
+        Menampilkan {{ $orders->firstItem() ?? 0 }}–{{ $orders->lastItem() ?? 0 }} dari {{ $orders->total() }} pesanan
+    </div>
+    @endif
 </div>
 
 {{ $orders->links('pagination.kazoku') }}

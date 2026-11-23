@@ -35,7 +35,7 @@
             <div class="acct" aria-label="Menu akun">
                 @auth
                 @if (auth()->user()->isAdmin())
-                <a href="{{ route('admin.dashboard') }}" class="btn ghost">Panel Admin</a>
+                <a href="{{ route('admin.orders.index') }}" class="btn ghost">Panel Admin</a>
                 @endif
                 <a href="{{ route('orders.index') }}" class="{{ request()->routeIs('orders.*') ? 'on' : '' }}"
                     aria-current="{{ request()->routeIs('orders.*') ? 'page' : 'false' }}">Pesanan Saya</a>

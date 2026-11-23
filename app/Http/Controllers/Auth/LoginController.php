@@ -50,7 +50,7 @@ class LoginController extends Controller
         $request->session()->regenerate();
 
         // Login boleh sebelum verifikasi email; mengirim pesanan nanti butuh 'verified' (BR-11).
-        $default = $request->user()->isAdmin() ? route('admin.dashboard') : route('home');
+        $default = $request->user()->isAdmin() ? route('admin.orders.index') : route('home');
 
         return redirect()->intended($default);
     }
