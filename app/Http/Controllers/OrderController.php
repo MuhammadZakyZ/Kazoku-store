@@ -185,7 +185,7 @@ class OrderController extends Controller
     {
         $this->authorizeOrder($request, $order);
 
-        $order->load(['items.product', 'designs', 'courier', 'payments.verifier']);
+        $order->load(['items.product', 'designs.printArea', 'courier', 'payments.verifier']);
 
         $upfront = match ($order->payment_method) {
             PaymentMethod::Dp => $order->dp_amount,
