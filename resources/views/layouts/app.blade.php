@@ -76,6 +76,9 @@
         @yield('content')
     </main>
 
+    @if (request()->routeIs('home', 'products.index', 'portfolios.index', 'testimonials.index'))
+    @include('partials.wa-float')
+    @endif
     @unless (request()->routeIs('admin.*') || request()->routeIs('login'))
     @include('partials.footer')
     @endunless

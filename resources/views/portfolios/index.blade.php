@@ -66,13 +66,4 @@
     @endif
 </div>
 
-@if ($whatsapp)
-<a class="wa-float" href="{{ $whatsapp }}" target="_blank" rel="noopener" aria-label="Tanya lewat WhatsApp">
-    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-        <path
-            d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-4.2 3.6c-.5.4-1.3.1-1.3-.6V16h-.0A2.5 2.5 0 0 1 4 13.5z"
-            fill="currentColor" />
-    </svg>
-</a>
-@endif
 @endsection

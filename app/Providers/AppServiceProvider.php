@@ -37,5 +37,10 @@ class AppServiceProvider extends ServiceProvider
                         : null),
             ]);
         });
+
+        // Tombol WhatsApp melayang: tautan dari nomor di Pengaturan admin (kosong = tombol disembunyikan).
+        View::composer('partials.wa-float', function ($view) {
+            $view->with('waFloatLink', Whatsapp::link(Setting::get('whatsapp_number'), 'Halo Kazoku Store, saya ingin bertanya.'));
+        });
     }
 }

@@ -3978,24 +3978,59 @@ main.wrap:has(> .hero) {
     transform: translateX(3px);
 }
 
+/* Tombol WhatsApp melayang: idle = bulat berikon, hover/fokus = memanjang "Chat WhatsApp" */
 .wa-float {
     position: fixed;
     right: 1.25rem;
     bottom: 1.5rem;
-    z-index: 30;
-    display: grid;
-    place-items: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+    z-index: 40;
+    display: inline-flex;
+    align-items: center;
+    height: 56px;
+    min-width: 56px;
+    padding: 0 17px;
+    overflow: hidden;
+    border-radius: 999px;
     background: var(--brand);
     color: #171717;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
-    transition: transform 0.18s ease;
+    text-decoration: none;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+    transition: padding 0.28s ease, box-shadow 0.28s ease;
 }
-.wa-float:hover {
-    transform: scale(1.07);
+
+.wa-float svg {
+    flex: none;
+    width: 22px;
+    height: 22px;
+}
+.wa-float span {
+    max-width: 0;
+    margin-left: 0;
+    overflow: hidden;
+    opacity: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    transition: max-width 0.3s ease, margin-left 0.3s ease, opacity 0.2s ease;
+}
+.wa-float:hover,
+.wa-float:focus-visible {
+    padding: 0 24px 0 19px;
     color: #171717;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.55);
+}
+.wa-float:hover span,
+.wa-float:focus-visible span {
+    max-width: 180px;
+    margin-left: 0.7rem;
+    opacity: 1;
+}
+@media (max-width: 560px) {
+    .wa-float { right: 1rem; bottom: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .wa-float, .wa-float span { transition: none; }
 }
 
 @media (max-width: 1000px) {
@@ -4406,4 +4441,411 @@ main.wrap:has(> .quotes) {
   .od-rows>div{flex-direction:column;gap:.15rem}
   .od-rows dd{text-align:left}
   .od-area{flex-direction:column;align-items:flex-start}
+}
+
+/* ===== Beranda (mengikuti desain Figma "Beranda") ===== */
+/* Beranda tampil selebar layar; tiap bagian mengatur lebar isinya sendiri lewat .hm-container */
+main.wrap:has(> .hm-page) {
+    max-width: none;
+    padding: 0;
+}
+.hm-container {
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+}
+.hm-section {
+    padding: 3.2rem 0;
+}
+.hm-band {
+    background: #121212;
+    border-block: 1px solid #1c1c1c;
+}
+.hm-kicker,
+.hm-eyebrow {
+    display: block;
+    color: var(--brand);
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+.hm-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+/* hero */
+.hm-hero {
+    position: relative;
+    overflow: hidden;
+    background: #0a0a0a;
+    border-bottom: 1px solid #1c1c1c;
+}
+.hm-hero-in {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 2rem;
+    min-height: 440px;
+}
+.hm-hero-copy {
+    position: relative;
+    z-index: 1;
+    padding: 3rem 0;
+}
+.hm-hero h1 {
+    max-width: 520px;
+    margin: 0.8rem 0 1rem;
+    font-size: clamp(2rem, 4.4vw, 3.3rem);
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+}
+.hm-hero p {
+    max-width: 440px;
+    margin: 0 0 1.4rem;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.7;
+}
+.hm-points {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.2rem;
+    margin: 1.4rem 0 0;
+    padding: 0;
+    list-style: none;
+    color: var(--muted);
+    font-size: 0.72rem;
+}
+.hm-points li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.hm-points svg {
+    width: 13px;
+    height: 13px;
+    fill: none;
+    stroke: var(--brand);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.hm-hero-photo {
+    position: relative;
+    align-self: stretch;
+    display: grid;
+    place-items: center;
+    min-height: 320px;
+    /* lebarkan foto sampai tepi kanan layar (isi tetap di dalam container 1140px) */
+    margin-right: calc((min(1140px, 100vw) - 100vw) / 2 - 1.25rem);
+}
+.hm-hero-photo:before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(90deg, #0a0a0a 0%, rgba(10, 10, 10, 0) 38%);
+    pointer-events: none;
+}
+.hm-hero-photo img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.hm-hero-photo .hm-hero-logo {
+    position: relative;
+    inset: auto;
+    width: min(70%, 380px);
+    height: auto;
+    object-fit: contain;
+}
+
+/* keunggulan singkat */
+.hm-features {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.2rem;
+    padding-block: 1.6rem;
+}
+.hm-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+.hm-icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid #5b4a1a;
+    border-radius: 50%;
+    background: #2a2410;
+}
+.hm-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: var(--brand);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.hm-feature strong {
+    display: block;
+    font-size: 0.8rem;
+}
+.hm-feature p {
+    margin: 0.2rem 0 0;
+    color: var(--muted);
+    font-size: 0.7rem;
+    line-height: 1.55;
+}
+
+/* judul bagian */
+.hm-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 0 1.4rem;
+}
+.hm-head h2 {
+    margin: 0.4rem 0 0;
+    font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+    letter-spacing: -0.03em;
+}
+.hm-head > a {
+    flex: none;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+.hm-note {
+    margin: 1rem 0 0;
+    color: var(--muted);
+    font-size: 0.7rem;
+}
+
+/* produk */
+.hm-products {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+/* alur */
+.hm-steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+.hm-step {
+    padding: 1.2rem;
+    border: 1px solid #222;
+    border-radius: 12px;
+    background: #0d0d0d;
+}
+.hm-step b {
+    display: block;
+    margin-bottom: 0.9rem;
+    color: var(--brand);
+    font-size: 1.15rem;
+    letter-spacing: -0.02em;
+}
+.hm-step strong {
+    display: block;
+    font-size: 0.86rem;
+}
+.hm-step p {
+    margin: 0.4rem 0 0;
+    color: var(--muted);
+    font-size: 0.72rem;
+    line-height: 1.6;
+}
+
+/* inspirasi */
+.hm-showcase {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 21/8;
+    border: 1px solid #262626;
+    border-radius: 14px;
+    background: #151515;
+}
+.hm-showcase img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+.hm-showcase:hover img {
+    transform: scale(1.03);
+}
+.hm-showcase-cap {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    color: #fff;
+}
+.hm-showcase-cap strong {
+    font-size: 0.82rem;
+}
+.hm-showcase-cap small {
+    color: #cfcfcf;
+    font-size: 0.66rem;
+}
+
+/* testimoni */
+.hm-quotes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+.hm-quote {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0;
+    padding: 1.1rem 1.2rem;
+    border: 1px solid #222;
+    border-radius: 12px;
+    background: #0d0d0d;
+}
+.hm-quote p {
+    margin: 0;
+    color: #e6e6e6;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.hm-quote footer {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0;
+}
+.hm-avatar {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #7a1f2b;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+.hm-quote footer strong {
+    display: block;
+    font-size: 0.76rem;
+}
+.hm-quote footer small {
+    color: var(--brand);
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+}
+
+/* ajakan */
+.hm-cta-wrap {
+    padding-bottom: 4rem;
+}
+.hm-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.2rem 2rem;
+    padding: 1.6rem 1.8rem;
+    border-radius: 12px;
+    background: #7a1f2b;
+}
+.hm-cta h2 {
+    margin: 0 0 0.3rem;
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+}
+.hm-cta p {
+    margin: 0;
+    color: #f0d3d7;
+    font-size: 0.78rem;
+}
+.hm-cta .hm-cta-ghost {
+    border-color: #f0d3d7;
+    background: transparent;
+    color: #fff;
+}
+.hm-cta .hm-cta-ghost:hover {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+@media (max-width: 960px) {
+    .hm-features,
+    .hm-steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .hm-products {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+@media (max-width: 760px) {
+    .hm-hero-in {
+        grid-template-columns: 1fr;
+        gap: 0;
+        min-height: 0;
+    }
+    .hm-hero-copy {
+        padding: 2.2rem 0 1.4rem;
+    }
+    .hm-hero-photo {
+        min-height: 240px;
+        margin: 0 -1.25rem;
+    }
+    .hm-hero-photo:before {
+        background: linear-gradient(180deg, #0a0a0a 0%, rgba(10, 10, 10, 0) 40%);
+    }
+    .hm-quotes {
+        grid-template-columns: 1fr;
+    }
+    .hm-products {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .hm-showcase {
+        aspect-ratio: 16/9;
+    }
+}
+@media (max-width: 480px) {
+    .hm-features,
+    .hm-steps {
+        grid-template-columns: 1fr;
+    }
+    .hm-cta .hm-actions {
+        width: 100%;
+    }
+    .hm-cta .btn {
+        flex: 1;
+        text-align: center;
+    }
 }
